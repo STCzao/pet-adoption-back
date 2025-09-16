@@ -1,6 +1,6 @@
 const { response } = require("express");
 const jwt = require("jsonwebtoken");
-const Usuari = require("../models/usuario");
+const Usuario = require("../models/usuario");
 
 const validarJWT = async (req, res = response, next) => {
   const token = req.header("x-token");
@@ -15,21 +15,21 @@ const validarJWT = async (req, res = response, next) => {
   try {
     const { uid } = jwt.verify(token, process.env.SECRETORPRIVATEKEY);
 
-    const usuario = await usuario.findById(uid);
+    const usuarioDB = await Usuario.findById(uid);
 
-    if (!usuario) {
+    if (!usuarioDB) {
       return res.status(401).json({
         msg: "Usuario no existe en DB - Token invalido",
       });
     }
 
-    if (!usuario.estado) {
+    if (!usuarioDB.estado) {
       return res.status(401).json({
         msg: "Usuario inhabilitado - Token invalido",
       });
     }
 
-    req.usuario = usuario;
+    req.usuario = usuarioDB;
     next();
   } catch (error) {
     console.log(error);
@@ -41,5 +41,5 @@ const validarJWT = async (req, res = response, next) => {
 };
 
 module.exports = {
-    validarJWT
-}
+  validarJWT,
+};
