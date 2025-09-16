@@ -43,7 +43,14 @@ const usuariosPost = async (req, res = response) => {
 
 const usuariosPut = async (req, res = response) => {
   const { id } = req.params;
-  const { _id, password, correo, ...resto } = req.body;
+  const { _id, password, google, correo, ...resto } = req.body;
+
+  // Verificar que el usuario solo pueda modificar su propia información (a menos que sea admin)
+  if (req.usuario.rol !== "ADMIN_ROLE" && req.usuario._id.toString() !== id) {
+    return res.status(403).json({
+      msg: "No tiene permisos para modificar este usuario",
+    });
+  }
 
   if (password) {
     const salt = bcryptjs.genSaltSync();
@@ -58,7 +65,13 @@ const usuariosPut = async (req, res = response) => {
 const usuariosDelete = async (req, res = response) => {
   const { id } = req.params;
 
-  //Solo admin puede eliminar usuarios
+  // Solo admin puede eliminar usuarios
+  if (req.usuario.rol !== "ADMIN_ROLE") {
+    return res.status(403).json({
+      msg: "No tiene permisos para eliminar usuarios",
+    });
+  }
+
   const usuario = await Usuario.findByIdAndUpdate(
     id,
     { estado: false },
@@ -73,6 +86,14 @@ const usuariosDelete = async (req, res = response) => {
 
 const usuarioGet = async (req, res = response) => {
   const { id } = req.params;
+
+  // Verificar que el usuario solo pueda ver su propia información (a menos que sea admin)
+  if (req.usuario.rol !== "ADMIN_ROLE" && req.usuario._id.toString() !== id) {
+    return res.status(403).json({
+      msg: "No tiene permisos para ver este usuario",
+    });
+  }
+
   const usuario = await Usuario.findById(id).select(
     "nombre correo telefono direccion rol estado"
   );
@@ -81,9 +102,9 @@ const usuarioGet = async (req, res = response) => {
 };
 
 const usuariosDashboard = async (req, res = response) => {
-  //Solo el usuario mismo o admin puede ver el dashboard
   const { id } = req.params;
 
+  // Solo el usuario mismo o admin puede ver el dashboard
   if (req.usuario.rol !== "ADMIN_ROLE" && req.usuario._id.toString() !== id) {
     return res.status(403).json({
       msg: "No tiene permisos para acceder a este dashboard",
@@ -94,6 +115,34 @@ const usuariosDashboard = async (req, res = response) => {
   res.json(usuario);
 };
 
+// Nuevo método para que usuario pueda ver/editar solo su perfil
+const miPerfilGet = async (req, res = response) => {
+  const usuario = await Usuario.findById(req.usuario._id).select("-password");
+  res.json(usuario);
+};
+
+const miPerfilPut = async (req, res = response) => {
+  const { password, google, correo, rol, ...resto } = req.body;
+
+  // Usuario no puede cambiar su propio rol
+  if (rol && req.usuario.rol !== "ADMIN_ROLE") {
+    return res.status(403).json({
+      msg: "No puede cambiar su rol",
+    });
+  }
+
+  if (password) {
+    const salt = bcryptjs.genSaltSync();
+    resto.password = bcryptjs.hashSync(password, salt);
+  }
+
+  const usuario = await Usuario.findByIdAndUpdate(req.usuario._id, resto, {
+    new: true,
+  }).select("-password");
+
+  res.json(usuario);
+};
+
 module.exports = {
   usuariosGet,
   usuariosPost,
@@ -101,4 +150,6 @@ module.exports = {
   usuariosDelete,
   usuarioGet,
   usuariosDashboard,
+  miPerfilGet,
+  miPerfilPut,
 };
