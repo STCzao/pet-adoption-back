@@ -40,7 +40,7 @@ const PublicacionSchema = Schema({
     required: [true, "El sexo es obligatorio"],
     enum: ["MACHO", "HEMBRA"],
   },
-  tamanio: {
+  tamaño: {
     type: String,
     required: [true, "El tamaño es obligatorio"],
     enum: ["PEQUENO", "MEDIANO", "GRANDE"],
