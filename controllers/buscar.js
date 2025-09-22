@@ -1,64 +1,70 @@
 const { response, request } = require("express");
 const Publicacion = require("../models/publicacion");
 
-// Definir colecciones permitidas para buscar
 const coleccionesPermitidas = ["publicaciones"];
 
-// Buscar publicaciones (búsqueda global en varios campos)
-const buscarPublicaciones = async (termino, res = response) => {
+const buscarPublicaciones = async (termino, tipo, res = response) => {
   try {
-    const regex = new RegExp(termino, "i"); // insensible a mayúsculas
+    const regex = new RegExp(termino, "i");
 
-    const publicaciones = await Publicacion.find({
-      estado: ["ACTIVO", "ENCONTRADO", "ADOPCION"], // solo publicaciones activas
+    // Solo publicaciones activas (no INACTIVO)
+    const query = {
+      estado: { $ne: "INACTIVO" },
       $or: [
         { titulo: regex },
         { descripcion: regex },
         { raza: regex },
-        { tipo: regex },
         { color: regex },
         { detalles: regex },
-        { sexo: regex },
         { edad: regex },
         { lugar: regex },
       ],
-    });
+    };
+
+    if (tipo) {
+      query.tipo = tipo.toUpperCase();
+    }
+
+    const publicaciones = await Publicacion.find(query)
+      .populate("usuario", "nombre")
+      .sort({ fechaCreacion: -1 });
 
     res.json({
-      msg: "Publicaciones encontradas",
-      results: publicaciones,
+      success: true,
+      results: publicaciones.length,
+      publicaciones,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({
+      success: false,
       msg: "Error al buscar publicaciones",
     });
   }
 };
 
-// Función principal para las búsquedas
 const buscar = async (req = request, res = response) => {
   const { coleccion, termino } = req.params;
+  const { tipo } = req.query;
 
-  // Validar la colección
   if (!coleccionesPermitidas.includes(coleccion)) {
     return res.status(400).json({
-      msg: `Las colecciones permitidas son: ${coleccionesPermitidas}`,
+      success: false,
+      msg: `Las colecciones permitidas son: ${coleccionesPermitidas.join(
+        ", "
+      )}`,
     });
   }
 
-  // En función de la colección, buscar los términos
   switch (coleccion) {
     case "publicaciones":
-      return buscarPublicaciones(termino, res);
-
+      return buscarPublicaciones(termino, tipo, res);
     default:
       return res.status(500).json({
-        msg: "Hubo un error al hacer la búsqueda",
+        success: false,
+        msg: "Error en la búsqueda",
       });
   }
 };
 
-module.exports = {
-  buscar,
-};
+module.exports = { buscar };

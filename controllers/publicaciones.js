@@ -1,197 +1,356 @@
 const { response } = require("express");
 const Publicacion = require("../models/publicacion");
 
+// Función para normalizar texto (case-insensitive)
+const normalizarTexto = (texto) => {
+    if (typeof texto !== 'string') return texto;
+    return texto.trim().toUpperCase();
+};
+
+// Obtener publicaciones públicas (todas excepto INACTIVO)
 const publicacionesGet = async (req, res = response) => {
-  const { limite = 10, desde = 0, tipo } = req.query;
-  const query = { estado: "ACTIVO" };
+    try {
+        const { limite = 10, desde = 0, tipo, estado, search } = req.query;
 
-  if (tipo) {
-    query.tipo = tipo;
-  }
+        // Query base: excluir SOLO INACTIVO - incluir ACTIVO, ENCONTRADO, VISTO, ADOPTADO
+        const query = { estado: { $ne: "INACTIVO" } };
 
-  const [total, publicaciones] = await Promise.all([
-    Publicacion.countDocuments(query),
-    Publicacion.find(query)
-      .populate("usuario", "nombre")
-      .skip(Number(desde))
-      .limit(Number(limite))
-      .sort({ fechaCreacion: -1 }),
-  ]);
+        // Filtro por tipo
+        if (tipo) {
+            query.tipo = normalizarTexto(tipo);
+        }
 
-  res.json({
-    total,
-    publicaciones,
-  });
+        // Filtro por estado específico (si se proporciona)
+        if (estado) {
+            const estadoNormalizado = normalizarTexto(estado);
+            // Solo aplicar filtro si no es INACTIVO
+            if (estadoNormalizado !== "INACTIVO") {
+                query.estado = estadoNormalizado;
+            }
+        }
+
+        // Búsqueda por texto en múltiples campos
+        if (search) {
+            const regex = new RegExp(search, 'i');
+            query.$or = [
+                { titulo: regex },
+                { descripcion: regex },
+                { raza: regex },
+                { color: regex },
+                { detalles: regex },
+                { edad: regex },
+                { lugar: regex }
+            ];
+        }
+
+        console.log("Query ejecutado:", query); // Para debugging
+
+        const [total, publicaciones] = await Promise.all([
+            Publicacion.countDocuments(query),
+            Publicacion.find(query)
+                .populate("usuario", "nombre")
+                .skip(Number(desde))
+                .limit(Number(limite))
+                .sort({ fechaCreacion: -1 })
+        ]);
+
+        res.json({ 
+            success: true,
+            total, 
+            publicaciones 
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ 
+            success: false,
+            msg: "Error al obtener publicaciones" 
+        });
+    }
 };
 
+// Obtener publicaciones de un usuario (para dashboard - incluye INACTIVO)
 const publicacionesUsuarioGet = async (req, res = response) => {
-  const { id } = req.params;
+    try {
+        const { id } = req.params;
 
-  // Solo el usuario mismo o admin puede ver sus publicaciones
-  if (req.usuario.rol !== "ADMIN_ROLE" && req.usuario._id.toString() !== id) {
-    return res.status(403).json({
-      msg: "No tiene permisos para ver estas publicaciones",
-    });
-  }
+        // Solo el usuario dueño o admin puede ver todas sus publicaciones (incluyendo INACTIVO)
+        if (req.usuario.rol !== "ADMIN_ROLE" && req.usuario._id.toString() !== id) {
+            return res.status(403).json({ 
+                success: false,
+                msg: "No tiene permisos para ver estas publicaciones" 
+            });
+        }
 
-  const publicaciones = await Publicacion.find({ usuario: id })
-    .populate("usuario", "nombre")
-    .sort({ fechaCreacion: -1 });
+        const publicaciones = await Publicacion.find({ usuario: id })
+            .populate("usuario", "nombre")
+            .sort({ fechaCreacion: -1 });
 
-  res.json({
-    publicaciones,
-  });
+        res.json({ 
+            success: true,
+            publicaciones 
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ 
+            success: false,
+            msg: "Error al obtener publicaciones del usuario" 
+        });
+    }
 };
 
+// Obtener publicación individual (pública - excluye INACTIVO)
 const publicacionGet = async (req, res = response) => {
-  const { id } = req.params;
-  const publicacion = await Publicacion.findById(id).populate(
-    "usuario",
-    "nombre"
-  );
+    try {
+        const { id } = req.params;
+        const publicacion = await Publicacion.findOne({ 
+            _id: id, 
+            estado: { $ne: "INACTIVO" } 
+        }).populate("usuario", "nombre");
 
-  if (!publicacion || publicacion.estado !== "ACTIVO") {
-    return res.status(404).json({
-      msg: "Publicación no encontrada",
-    });
-  }
+        if (!publicacion) {
+            return res.status(404).json({ 
+                success: false,
+                msg: "Publicación no encontrada" 
+            });
+        }
 
-  res.json(publicacion);
+        res.json({ 
+            success: true,
+            publicacion 
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ 
+            success: false,
+            msg: "Error al obtener la publicación" 
+        });
+    }
 };
 
+// Crear publicación
 const publicacionesPost = async (req, res = response) => {
-  const { estado, usuario, ...body } = req.body;
+    try {
+        const { estado, usuario, ...body } = req.body;
 
-  const publicacion = new Publicacion({
-    ...body,
-    usuario: req.usuario._id,
-  });
+        // Normalizar todos los campos de texto
+        const datosNormalizados = {
+            titulo: normalizarTexto(body.titulo),
+            descripcion: normalizarTexto(body.descripcion),
+            tipo: normalizarTexto(body.tipo),
+            raza: normalizarTexto(body.raza),
+            lugar: body.lugar ? normalizarTexto(body.lugar) : undefined,
+            sexo: normalizarTexto(body.sexo),
+            tamanio: normalizarTexto(body.tamanio),
+            color: normalizarTexto(body.color),
+            edad: normalizarTexto(body.edad),
+            detalles: body.detalles ? normalizarTexto(body.detalles) : undefined,
+            afinidad: body.afinidad ? normalizarTexto(body.afinidad) : undefined,
+            energia: body.energia ? normalizarTexto(body.energia) : undefined,
+            castrado: body.castrado,
+            usuario: req.usuario._id,
+        };
 
-  try {
-    const publicacionDB = await publicacion.save();
-    await publicacionDB.populate("usuario", "nombre");
+        const publicacion = new Publicacion(datosNormalizados);
+        const publicacionDB = await publicacion.save();
+        await publicacionDB.populate("usuario", "nombre");
 
-    res.status(201).json(publicacionDB);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      msg: "Hable con el administrador",
-    });
-  }
+        res.status(201).json({ 
+            success: true,
+            msg: "Publicación creada exitosamente",
+            publicacion: publicacionDB 
+        });
+    } catch (error) {
+        console.error(error);
+        
+        if (error.code === 11000) {
+            return res.status(400).json({ 
+                success: false,
+                msg: "Ya existe una publicación similar" 
+            });
+        }
+
+        res.status(500).json({ 
+            success: false,
+            msg: "Error al crear la publicación" 
+        });
+    }
 };
 
+// Actualizar publicación (solo dueño o admin)
 const publicacionesPut = async (req, res = response) => {
-  const { id } = req.params;
-  const { _id, usuario, ...resto } = req.body;
+    try {
+        const { id } = req.params;
+        const { _id, usuario, ...resto } = req.body;
 
-  const publicacionExistente = await Publicacion.findById(id);
-  if (!publicacionExistente || publicacionExistente.estado !== "ACTIVO") {
-    return res.status(404).json({
-      msg: "Publicación no encontrada",
-    });
-  }
+        // Buscar publicación (incluyendo INACTIVO para que dueño/admin pueda reactivar)
+        const publicacionExistente = await Publicacion.findById(id);
+        
+        if (!publicacionExistente) {
+            return res.status(404).json({ 
+                success: false,
+                msg: "Publicación no encontrada" 
+            });
+        }
 
-  // Solo el dueño o admin puede editar
-  if (
-    publicacionExistente.usuario.toString() !== req.usuario._id.toString() &&
-    req.usuario.rol !== "ADMIN_ROLE"
-  ) {
-    return res.status(403).json({
-      msg: "No tiene privilegios para editar esta publicación",
-    });
-  }
+        // Verificar permisos: solo dueño o admin
+        if (publicacionExistente.usuario.toString() !== req.usuario._id.toString() && 
+            req.usuario.rol !== "ADMIN_ROLE") {
+            return res.status(403).json({ 
+                success: false,
+                msg: "No tiene permisos para editar esta publicación" 
+            });
+        }
 
-  const publicacionActualizada = await Publicacion.findByIdAndUpdate(
-    id,
-    resto,
-    { new: true }
-  ).populate("usuario", "nombre");
+        // Normalizar campos de texto
+        const datosNormalizados = {};
+        Object.keys(resto).forEach(key => {
+            if (typeof resto[key] === 'string' && resto[key].trim() !== '') {
+                datosNormalizados[key] = normalizarTexto(resto[key]);
+            } else {
+                datosNormalizados[key] = resto[key];
+            }
+        });
 
-  res.json(publicacionActualizada);
+        const publicacionActualizada = await Publicacion.findByIdAndUpdate(
+            id, 
+            datosNormalizados, 
+            { new: true }
+        ).populate("usuario", "nombre");
+
+        res.json({ 
+            success: true,
+            msg: "Publicación actualizada exitosamente",
+            publicacion: publicacionActualizada 
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ 
+            success: false,
+            msg: "Error al actualizar la publicación" 
+        });
+    }
 };
 
+// Eliminar publicación (cambiar estado a INACTIVO)
 const publicacionesDelete = async (req, res = response) => {
-  const { id } = req.params;
+    try {
+        const { id } = req.params;
 
-  const publicacion = await Publicacion.findById(id);
-  if (!publicacion) {
-    return res.status(404).json({
-      msg: "Publicación no encontrada",
-    });
-  }
+        const publicacion = await Publicacion.findById(id);
+        
+        if (!publicacion) {
+            return res.status(404).json({ 
+                success: false,
+                msg: "Publicación no encontrada" 
+            });
+        }
 
-  // Solo el dueño o admin puede eliminar
-  if (
-    publicacion.usuario.toString() !== req.usuario._id.toString() &&
-    req.usuario.rol !== "ADMIN_ROLE"
-  ) {
-    return res.status(403).json({
-      msg: "No tiene privilegios para eliminar esta publicación",
-    });
-  }
+        // Verificar permisos: solo dueño o admin
+        if (publicacion.usuario.toString() !== req.usuario._id.toString() && 
+            req.usuario.rol !== "ADMIN_ROLE") {
+            return res.status(403).json({ 
+                success: false,
+                msg: "No tiene permisos para eliminar esta publicación" 
+            });
+        }
 
-  const publicacionEliminada = await Publicacion.findByIdAndDelete(id);
+        const publicacionEliminada = await Publicacion.findByIdAndUpdate(
+            id, 
+            { estado: "INACTIVO" }, 
+            { new: true }
+        );
 
-  res.json({
-    msg: "Publicación eliminada correctamente",
-    publicacion: publicacionEliminada,
-  });
+        res.json({
+            success: true,
+            msg: "Publicación eliminada correctamente",
+            publicacion: publicacionEliminada
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ 
+            success: false,
+            msg: "Error al eliminar la publicación" 
+        });
+    }
 };
 
+// Obtener contacto de la publicación (requiere autenticación)
 const obtenerContactoPublicacion = async (req, res = response) => {
-  const { id } = req.params;
+    try {
+        const { id } = req.params;
 
-  const publicacion = await Publicacion.findById(id).populate(
-    "usuario",
-    "nombre telefono correo"
-  );
+        // Buscar publicación activa (excluye INACTIVO)
+        const publicacion = await Publicacion.findOne({ 
+            _id: id, 
+            estado: { $ne: "INACTIVO" } 
+        }).populate("usuario", "nombre telefono correo");
 
-  if (!publicacion || publicacion.estado !== "ACTIVO") {
-    return res.status(404).json({
-      msg: "Publicación no encontrada",
-    });
-  }
+        if (!publicacion) {
+            return res.status(404).json({ 
+                success: false,
+                msg: "Publicación no encontrada" 
+            });
+        }
 
-  const contacto = {
-    nombre: publicacion.usuario.nombre,
-    telefono: publicacion.usuario.telefono,
-    correo: publicacion.usuario.correo,
-  };
+        const contacto = {
+            nombre: publicacion.usuario.nombre,
+            telefono: publicacion.usuario.telefono,
+            correo: publicacion.usuario.correo
+        };
 
-  res.json(contacto);
+        res.json({ 
+            success: true,
+            contacto 
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ 
+            success: false,
+            msg: "Error al obtener información de contacto" 
+        });
+    }
 };
 
-// Nuevo método para que admin gestione todas las publicaciones
+// Admin: ver todas las publicaciones (incluyendo INACTIVO)
 const publicacionesAdminGet = async (req, res = response) => {
-  const { limite = 10, desde = 0, estado } = req.query;
-  const query = {};
+    try {
+        const { limite = 10, desde = 0, estado } = req.query;
+        
+        const query = {};
+        if (estado) {
+            query.estado = normalizarTexto(estado);
+        }
 
-  if (estado) {
-    query.estado = estado;
-  }
+        const [total, publicaciones] = await Promise.all([
+            Publicacion.countDocuments(query),
+            Publicacion.find(query)
+                .populate("usuario", "nombre correo")
+                .skip(Number(desde))
+                .limit(Number(limite))
+                .sort({ fechaCreacion: -1 })
+        ]);
 
-  const [total, publicaciones] = await Promise.all([
-    Publicacion.countDocuments(query),
-    Publicacion.find(query)
-      .populate("usuario", "nombre correo")
-      .skip(Number(desde))
-      .limit(Number(limite))
-      .sort({ fechaCreacion: -1 }),
-  ]);
-
-  res.json({
-    total,
-    publicaciones,
-  });
+        res.json({ 
+            success: true,
+            total, 
+            publicaciones 
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ 
+            success: false,
+            msg: "Error al obtener publicaciones" 
+        });
+    }
 };
 
 module.exports = {
-  publicacionesGet,
-  publicacionesUsuarioGet,
-  publicacionGet,
-  publicacionesPost,
-  publicacionesPut,
-  publicacionesDelete,
-  obtenerContactoPublicacion,
-  publicacionesAdminGet,
+    publicacionesGet,
+    publicacionesUsuarioGet,
+    publicacionGet,
+    publicacionesPost,
+    publicacionesPut,
+    publicacionesDelete,
+    obtenerContactoPublicacion,
+    publicacionesAdminGet
 };
