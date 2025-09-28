@@ -22,14 +22,42 @@ const usuariosGet = async (req, res = response) => {
 
 const usuariosPost = async (req, res = response) => {
   const { nombre, correo, password, rol, telefono, direccion } = req.body;
-  const usuario = new Usuario({
-    nombre,
-    correo,
-    password,
-    rol: rol || "USER_ROLE",
-    telefono,
-    direccion,
-  });
+
+  try {
+    const usuario = new Usuario({
+      nombre,
+      correo,
+      password,
+      rol: rol || "USER_ROLE",
+      telefono,
+      direccion,
+    });
+
+    // Hashear la contraseña
+    const salt = bcryptjs.genSaltSync();
+    usuario.password = bcryptjs.hashSync(password, salt);
+
+    // Guardar usuario en la base de datos
+    await usuario.save();
+
+    res.json({
+      usuario,
+    });
+  } catch (error) {
+    // Manejar correo duplicado
+    if (error.code === 11000) {
+      return res.status(400).json({
+        msg: `El correo ${correo} ya está registrado`,
+      });
+    }
+
+    console.error(error);
+    res.status(500).json({
+      msg: "Error al registrar usuario",
+    });
+  }
+};
+
 
   const salt = bcryptjs.genSaltSync();
   usuario.password = bcryptjs.hashSync(password, salt);
