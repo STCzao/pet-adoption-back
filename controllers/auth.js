@@ -3,7 +3,7 @@ const bcryptjs = require("bcryptjs");
 const crypto = require("crypto");
 const Usuario = require("../models/usuario");
 const { generarJWT } = require("../helpers/generar-jwt");
-const { enviarEmail } = require("../helpers/enviar-email"); // helper que creamos para mandar mails
+const { enviarEmail } = require("../helpers/enviar-mails"); // helper que creamos para mandar mails
 
 const login = async (req, res = response) => {
   const { correo, password } = req.body;
