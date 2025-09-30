@@ -69,12 +69,6 @@ const resetPassword = async (req, res = response) => {
   const { token } = req.params;
   const { password } = req.body;
 
-  if (password.length < 6 || password.length > 15) {
-    return res.status(400).json({
-      msg: "La contraseña debe tener entre 6 y 15 caracteres",
-    });
-  }
-
   try {
     const usuario = await Usuario.findOne({
       resetToken: token,
@@ -83,6 +77,12 @@ const resetPassword = async (req, res = response) => {
 
     if (!usuario)
       return res.status(400).json({ msg: "Token inválido o expirado" });
+
+    if (password.length < 6 || password.length > 15) {
+      return res
+        .status(400)
+        .json({ msg: "La contraseña debe tener entre 6 y 15 caracteres" });
+    }
 
     const salt = bcryptjs.genSaltSync(10);
     usuario.password = bcryptjs.hashSync(password, salt);
