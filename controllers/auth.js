@@ -2,7 +2,7 @@ const { response } = require("express");
 const bcryptjs = require("bcryptjs");
 const crypto = require("crypto");
 const Usuario = require("../models/usuario");
-const { generarJWT } = require("../helpers/generar-jwt");
+const { generarJWT } = require("../helpers/gestionar-jwt");
 const { enviarEmail } = require("../helpers/enviar-mails");
 
 // ------------------------- LOGIN -------------------------
@@ -28,7 +28,7 @@ const login = async (req, res = response) => {
     res.json({ usuario, token });
   } catch (error) {
     console.log("Error en login:", error);
-    res.status(500).json({ msg: "Hable con el administrador" });
+    res.status(500).json({ msg: "Error en el servidor" });
   }
 };
 
@@ -78,20 +78,10 @@ const resetPassword = async (req, res = response) => {
     if (!usuario)
       return res.status(400).json({ msg: "Token inválido o expirado" });
 
-    if (password.length < 6) {
+    if (password.length < 6 || password.length > 15) {
       return res
         .status(400)
-        .json({
-          msg: "La contraseña es demasiado corta. Debe tener al menos 6 caracteres.",
-        });
-    }
-
-    if (password.length > 15) {
-      return res
-        .status(400)
-        .json({
-          msg: "La contraseña es demasiado larga. No puede tener más de 15 caracteres.",
-        });
+        .json({ msg: "La contraseña debe tener entre 6 y 15 caracteres" });
     }
 
     const salt = bcryptjs.genSaltSync(10);

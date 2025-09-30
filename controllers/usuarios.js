@@ -23,22 +23,6 @@ const usuariosPost = async (req, res = response) => {
   const { nombre, correo, password, rol, telefono, direccion } = req.body;
 
   try {
-    if (password.length < 6) {
-      return res
-        .status(400)
-        .json({
-          msg: "La contraseña es demasiado corta. Debe tener al menos 6 caracteres.",
-        });
-    }
-
-    if (password.length > 15) {
-      return res
-        .status(400)
-        .json({
-          msg: "La contraseña es demasiado larga. No puede tener más de 15 caracteres.",
-        });
-    }
-
     const usuario = new Usuario({
       nombre,
       correo,
@@ -47,6 +31,8 @@ const usuariosPost = async (req, res = response) => {
       telefono,
       direccion,
     });
+
+    // Hash de la contraseña
     const salt = bcryptjs.genSaltSync();
     usuario.password = bcryptjs.hashSync(password, salt);
 
@@ -58,8 +44,14 @@ const usuariosPost = async (req, res = response) => {
         .status(400)
         .json({ msg: `El correo ${correo} ya está registrado` });
     }
+
+    if (error.name === "ValidationError") {
+      const mensajes = Object.values(error.errors).map((err) => err.message);
+      return res.status(400).json({ msg: mensajes.join(", ") });
+    }
+
     console.error(error);
-    res.status(500).json({ msg: "Error al registrar usuario" });
+    res.status(500).json({ msg: "Error en el servidor" });
   }
 };
 
@@ -84,7 +76,9 @@ const usuariosPut = async (req, res = response) => {
     resto.password = bcryptjs.hashSync(password, salt);
   }
 
-  const usuario = await Usuario.findByIdAndUpdate(id, resto, { new: true });
+  const usuario = await Usuario.findByIdAndUpdate(id, resto, {
+    new: true,
+  }).select("-password");
   res.json(usuario);
 };
 
