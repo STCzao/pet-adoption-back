@@ -3,7 +3,7 @@ const bcryptjs = require("bcryptjs");
 const crypto = require("crypto");
 const Usuario = require("../models/usuario");
 const { generarJWT } = require("../helpers/generar-jwt");
-const { enviarEmail } = require("../helpers/enviar-mails"); // helper para mandar mails
+const { enviarEmail } = require("../helpers/enviar-mails");
 
 // ------------------------- LOGIN -------------------------
 const login = async (req, res = response) => {
@@ -65,7 +65,9 @@ const forgotPassword = async (req, res = response) => {
        <p>Este enlace expirará en 1 hora.</p>`
     );
 
-    res.json({ msg: "Se envió un correo para restablecer la contraseña (verifica la casilla de Spam)" });
+    res.json({
+      msg: "Se envió un correo para restablecer la contraseña (verifica la casilla de Spam)",
+    });
   } catch (error) {
     console.log("Error en forgotPassword:", error);
     res.status(500).json({ msg: "Error en el servidor" });
@@ -80,7 +82,7 @@ const resetPassword = async (req, res = response) => {
   try {
     const usuario = await Usuario.findOne({
       resetToken: token,
-      resetTokenExp: { $gt: Date.now() }, // token válido
+      resetTokenExp: { $gt: Date.now() },
     });
 
     if (!usuario) {

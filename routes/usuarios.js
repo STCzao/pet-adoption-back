@@ -20,15 +20,15 @@ const router = Router();
 router.post(
   "/",
   [
-    check("nombre", "El nombre es obligatorio").not().isEmpty(),
+    check("nombre", "El nombre debe tener entre 3 y 15 caracteres").isLength({
+      min: 3,
+      max: 15,
+    }),
     check(
       "password",
       "La contraseña debe tener entre 6 y 15 caracteres"
-    ).isLength({
-      min: 6,
-      max: 15,
-    }),
-    check("correo", "El correo no es válido").isEmail(),
+    ).isLength({ min: 6, max: 15 }),
+    check("correo", "El correo debe ser válido").isEmail(),
     check("telefono", "El teléfono es obligatorio").not().isEmpty(),
     validarCampos,
   ],
@@ -42,7 +42,9 @@ router.put(
   "/mi-perfil",
   [
     validarJWT,
-    check("nombre", "El nombre es obligatorio").optional().not().isEmpty(),
+    check("nombre", "El nombre debe tener entre 3 y 15 caracteres")
+      .optional()
+      .isLength({ min: 3, max: 15 }),
     check("telefono", "El teléfono es obligatorio").optional().not().isEmpty(),
     validarCampos,
   ],
