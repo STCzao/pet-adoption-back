@@ -21,36 +21,30 @@ const UsuarioSchema = Schema({
     type: String,
     required: [true, "La contraseña es obligatoria"],
     minlength: [6, "La contraseña debe tener al menos 6 caracteres"],
-    // quitamos maxlength porque bcrypt genera hashes largos
+    maxlength: [15, "La contraseña no puede tener más de 15 caracteres"],
   },
   telefono: {
     type: String,
     required: [true, "El teléfono es obligatorio"],
-    match: [/^[0-9]{7,15}$/, "El teléfono debe tener entre 7 y 15 dígitos"],
+    match: [
+      /^[0-9]{7,15}$/,
+      "El teléfono debe contener entre 7 y 15 dígitos numéricos",
+    ],
   },
   direccion: {
     type: String,
     maxlength: [30, "La dirección no puede superar los 30 caracteres"],
   },
-  img: {
-    type: String,
-  },
+  img: { type: String },
   rol: {
     type: String,
     required: true,
     default: "USER_ROLE",
     enum: ["ADMIN_ROLE", "USER_ROLE"],
   },
-  estado: {
-    type: Boolean,
-    default: true,
-  },
-  resetToken: {
-    type: String,
-  },
-  resetTokenExp: {
-    type: Date,
-  },
+  estado: { type: Boolean, default: true },
+  resetToken: { type: String },
+  resetTokenExp: { type: Date },
 });
 
 // Sobreescribir JSON para no devolver campos sensibles
