@@ -21,9 +21,8 @@ const UsuarioSchema = Schema({
     type: String,
     required: [true, "La contraseña es obligatoria"],
     minlength: [6, "La contraseña debe tener al menos 6 caracteres"],
-    maxlength: [15, "La contraseña no puede tener mas de 15 caracteres"],
     match: [
-      /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{6,15}$/,
+      /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{6,}$/,
       "La contraseña debe incluir al menos una letra, un numero y puede contener caracteres especiales",
     ],
   },
@@ -60,6 +59,7 @@ const UsuarioSchema = Schema({
   },
 });
 
+// Sobreescribir JSON para no devolver campos sensibles
 UsuarioSchema.methods.toJSON = function () {
   const { __v, password, resetToken, resetTokenExp, _id, ...usuario } =
     this.toObject();
