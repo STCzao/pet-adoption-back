@@ -25,37 +25,27 @@ const login = async (req, res = response) => {
     }
 
     const token = await generarJWT(usuario.id);
-
     res.json({ usuario, token });
   } catch (error) {
     console.log("Error en login:", error);
-    return res.status(500).json({ msg: "Hable con el administrador" });
+    res.status(500).json({ msg: "Hable con el administrador" });
   }
 };
 
 // ----------------- FORGOT PASSWORD ----------------------
 const forgotPassword = async (req, res = response) => {
   const { correo } = req.body;
-  console.log("Solicitud de recuperación para correo:", correo);
 
   try {
     const usuario = await Usuario.findOne({ correo });
-    if (!usuario) {
-      console.log("Usuario no encontrado:", correo);
-      return res.status(400).json({ msg: "Usuario no encontrado" });
-    }
+    if (!usuario) return res.status(400).json({ msg: "Usuario no encontrado" });
 
     const token = crypto.randomBytes(32).toString("hex");
-    const exp = Date.now() + 3600000; // 1 hora
-
     usuario.resetToken = token;
-    usuario.resetTokenExp = exp;
+    usuario.resetTokenExp = Date.now() + 3600000; // 1 hora
     await usuario.save();
-    console.log("Token generado para usuario:", usuario.correo);
 
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${token}`;
-    console.log("URL de reset:", resetUrl);
-
     await enviarEmail(
       usuario.correo,
       "Recuperar contraseña",
@@ -85,9 +75,8 @@ const resetPassword = async (req, res = response) => {
       resetTokenExp: { $gt: Date.now() },
     });
 
-    if (!usuario) {
+    if (!usuario)
       return res.status(400).json({ msg: "Token inválido o expirado" });
-    }
 
     const salt = bcryptjs.genSaltSync(10);
     usuario.password = bcryptjs.hashSync(password, salt);
@@ -103,8 +92,4 @@ const resetPassword = async (req, res = response) => {
   }
 };
 
-module.exports = {
-  login,
-  forgotPassword,
-  resetPassword,
-};
+module.exports = { login, forgotPassword, resetPassword };

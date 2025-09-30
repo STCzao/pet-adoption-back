@@ -60,7 +60,6 @@ const UsuarioSchema = Schema({
   },
 });
 
-// Sobreescribir JSON para no devolver campos sensibles
 UsuarioSchema.methods.toJSON = function () {
   const { __v, password, resetToken, resetTokenExp, _id, ...usuario } =
     this.toObject();
