@@ -3,8 +3,9 @@ const bcryptjs = require("bcryptjs");
 const crypto = require("crypto");
 const Usuario = require("../models/usuario");
 const { generarJWT } = require("../helpers/generar-jwt");
-const { enviarEmail } = require("../helpers/enviar-mails"); // helper que creamos para mandar mails
+const { enviarEmail } = require("../helpers/enviar-mails"); // helper para mandar mails
 
+// ------------------------- LOGIN -------------------------
 const login = async (req, res = response) => {
   const { correo, password } = req.body;
 
@@ -27,34 +28,34 @@ const login = async (req, res = response) => {
 
     res.json({ usuario, token });
   } catch (error) {
-    console.log(error);
+    console.log("Error en login:", error);
     return res.status(500).json({ msg: "Hable con el administrador" });
   }
 };
 
-// -------------------------------------------------------
-// Solicitar recuperacion de contraseña
+// ----------------- FORGOT PASSWORD ----------------------
 const forgotPassword = async (req, res = response) => {
   const { correo } = req.body;
+  console.log("Solicitud de recuperación para correo:", correo);
 
   try {
     const usuario = await Usuario.findOne({ correo });
     if (!usuario) {
+      console.log("Usuario no encontrado:", correo);
       return res.status(400).json({ msg: "Usuario no encontrado" });
     }
 
-    // Generar token y expiracion
     const token = crypto.randomBytes(32).toString("hex");
     const exp = Date.now() + 3600000; // 1 hora
 
     usuario.resetToken = token;
     usuario.resetTokenExp = exp;
     await usuario.save();
+    console.log("Token generado para usuario:", usuario.correo);
 
-    // URL hacia el front (variable de entorno)
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${token}`;
+    console.log("URL de reset:", resetUrl);
 
-    // Enviar correo con el link
     await enviarEmail(
       usuario.correo,
       "Recuperar contraseña",
@@ -66,13 +67,12 @@ const forgotPassword = async (req, res = response) => {
 
     res.json({ msg: "Se envió un correo para restablecer la contraseña" });
   } catch (error) {
-    console.log(error);
+    console.log("Error en forgotPassword:", error);
     res.status(500).json({ msg: "Error en el servidor" });
   }
 };
 
-// -------------------------------------------------------
-// Resetear contraseña
+// ----------------- RESET PASSWORD -----------------------
 const resetPassword = async (req, res = response) => {
   const { token } = req.params;
   const { password } = req.body;
@@ -80,14 +80,13 @@ const resetPassword = async (req, res = response) => {
   try {
     const usuario = await Usuario.findOne({
       resetToken: token,
-      resetTokenExp: { $gt: Date.now() }, // token valido
+      resetTokenExp: { $gt: Date.now() }, // token válido
     });
 
     if (!usuario) {
       return res.status(400).json({ msg: "Token inválido o expirado" });
     }
 
-    // Hashear nueva contraseña
     const salt = bcryptjs.genSaltSync(10);
     usuario.password = bcryptjs.hashSync(password, salt);
 
@@ -97,7 +96,7 @@ const resetPassword = async (req, res = response) => {
 
     res.json({ msg: "Contraseña actualizada correctamente" });
   } catch (error) {
-    console.log(error);
+    console.log("Error en resetPassword:", error);
     res.status(500).json({ msg: "Error en el servidor" });
   }
 };
