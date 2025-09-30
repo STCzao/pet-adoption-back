@@ -22,6 +22,12 @@ const usuariosGet = async (req, res = response) => {
 const usuariosPost = async (req, res = response) => {
   const { nombre, correo, password, rol, telefono, direccion } = req.body;
 
+  if (password.length < 6 || password.length > 15) {
+    return res.status(400).json({
+      msg: "La contraseña debe tener entre 6 y 15 caracteres",
+    });
+  }
+
   try {
     const usuario = new Usuario({
       nombre,
@@ -62,6 +68,11 @@ const usuariosPut = async (req, res = response) => {
   }
 
   if (password) {
+    if (password.length < 6 || password.length > 15) {
+      return res.status(400).json({
+        msg: "La contraseña debe tener entre 6 y 15 caracteres",
+      });
+    }
     const salt = bcryptjs.genSaltSync();
     resto.password = bcryptjs.hashSync(password, salt);
   }
@@ -132,6 +143,11 @@ const miPerfilPut = async (req, res = response) => {
   }
 
   if (password) {
+    if (password.length < 6 || password.length > 15) {
+      return res.status(400).json({
+        msg: "La contraseña debe tener entre 6 y 15 caracteres",
+      });
+    }
     const salt = bcryptjs.genSaltSync();
     resto.password = bcryptjs.hashSync(password, salt);
   }
