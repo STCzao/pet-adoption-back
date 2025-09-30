@@ -16,7 +16,7 @@ const { esAdminRole } = require("../middlewares/validar-roles");
 
 const router = Router();
 
-// Rutas públicas
+// Rutas públicas - crear usuario
 router.post(
   "/",
   [
@@ -27,7 +27,10 @@ router.post(
     check(
       "password",
       "La contraseña debe tener entre 6 y 15 caracteres"
-    ).isLength({ min: 6, max: 15 }),
+    ).isLength({
+      min: 6,
+      max: 15,
+    }),
     check("correo", "El correo debe ser válido").isEmail(),
     check("telefono", "El teléfono es obligatorio").not().isEmpty(),
     validarCampos,
@@ -46,6 +49,9 @@ router.put(
       .optional()
       .isLength({ min: 3, max: 15 }),
     check("telefono", "El teléfono es obligatorio").optional().not().isEmpty(),
+    check("password", "La contraseña debe tener entre 6 y 15 caracteres")
+      .optional()
+      .isLength({ min: 6, max: 15 }),
     validarCampos,
   ],
   miPerfilPut
@@ -68,7 +74,14 @@ router.get(
 
 router.put(
   "/:id",
-  [validarJWT, check("id", "No es un ID válido").isMongoId(), validarCampos],
+  [
+    validarJWT,
+    check("id", "No es un ID válido").isMongoId(),
+    check("password", "La contraseña debe tener entre 6 y 15 caracteres")
+      .optional()
+      .isLength({ min: 6, max: 15 }),
+    validarCampos,
+  ],
   usuariosPut
 );
 
