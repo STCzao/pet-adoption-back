@@ -14,14 +14,14 @@ const login = async (req, res = response) => {
     if (!usuario || !usuario.estado) {
       return res
         .status(400)
-        .json({ msg: "Usuario / Password no son correctos" });
+        .json({ msg: "El usuario o la contraseña no coinciden" });
     }
 
     const validPassword = bcryptjs.compareSync(password, usuario.password);
     if (!validPassword) {
       return res
         .status(400)
-        .json({ msg: "Usuario / Password no son correctos" });
+        .json({ msg: "El usuario o la contraseña no coinciden" });
     }
 
     const token = await generarJWT(usuario.id);
@@ -65,7 +65,7 @@ const forgotPassword = async (req, res = response) => {
        <p>Este enlace expirará en 1 hora.</p>`
     );
 
-    res.json({ msg: "Se envió un correo para restablecer la contraseña" });
+    res.json({ msg: "Se envió un correo para restablecer la contraseña (verifica la casilla de Spam)" });
   } catch (error) {
     console.log("Error en forgotPassword:", error);
     res.status(500).json({ msg: "Error en el servidor" });
