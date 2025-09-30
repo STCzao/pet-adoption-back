@@ -5,12 +5,6 @@ const Usuario = require("../models/usuario");
 const { generarJWT } = require("../helpers/generar-jwt");
 const { enviarEmail } = require("../helpers/enviar-mails");
 
-// Helper para validar contraseña antes de guardarla
-const validarPassword = (password) => {
-  const regex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{6,15}$/;
-  return regex.test(password);
-};
-
 // ------------------------- LOGIN -------------------------
 const login = async (req, res = response) => {
   const { correo, password } = req.body;
@@ -75,14 +69,13 @@ const resetPassword = async (req, res = response) => {
   const { token } = req.params;
   const { password } = req.body;
 
-  try {
-    // Validar contraseña antes de guardarla
-    if (!validarPassword(password)) {
-      return res.status(400).json({
-        msg: "La contraseña debe tener entre 6 y 15 caracteres, incluir al menos una letra, un número y puede contener caracteres especiales",
-      });
-    }
+  if (password.length < 6 || password.length > 15) {
+    return res.status(400).json({
+      msg: "La contraseña debe tener entre 6 y 15 caracteres",
+    });
+  }
 
+  try {
     const usuario = await Usuario.findOne({
       resetToken: token,
       resetTokenExp: { $gt: Date.now() },
