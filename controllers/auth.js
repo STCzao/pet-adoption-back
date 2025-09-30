@@ -2,7 +2,7 @@ const { response } = require("express");
 const bcryptjs = require("bcryptjs");
 const crypto = require("crypto");
 const Usuario = require("../models/usuario");
-const { generarJWT } = require("../helpers/gestionar-jwt");
+const { generarJWT } = require("../helpers/generar-jwt");
 const { enviarEmail } = require("../helpers/enviar-mails");
 
 // ------------------------- LOGIN -------------------------
@@ -12,16 +12,12 @@ const login = async (req, res = response) => {
   try {
     const usuario = await Usuario.findOne({ correo });
     if (!usuario || !usuario.estado) {
-      return res
-        .status(400)
-        .json({ msg: "El usuario o la contraseña no coinciden" });
+      return res.status(400).json({ msg: "Correo o contraseña incorrectos" });
     }
 
     const validPassword = bcryptjs.compareSync(password, usuario.password);
     if (!validPassword) {
-      return res
-        .status(400)
-        .json({ msg: "El usuario o la contraseña no coinciden" });
+      return res.status(400).json({ msg: "Correo o contraseña incorrectos" });
     }
 
     const token = await generarJWT(usuario.id);
@@ -38,7 +34,10 @@ const forgotPassword = async (req, res = response) => {
 
   try {
     const usuario = await Usuario.findOne({ correo });
-    if (!usuario) return res.status(400).json({ msg: "Usuario no encontrado" });
+    if (!usuario)
+      return res
+        .status(400)
+        .json({ msg: "No existe un usuario con ese correo" });
 
     const token = crypto.randomBytes(32).toString("hex");
     usuario.resetToken = token;
@@ -78,11 +77,15 @@ const resetPassword = async (req, res = response) => {
     if (!usuario)
       return res.status(400).json({ msg: "Token inválido o expirado" });
 
-    if (password.length < 6 || password.length > 15) {
+    if (password.length < 6)
       return res
         .status(400)
-        .json({ msg: "La contraseña debe tener entre 6 y 15 caracteres" });
-    }
+        .json({ msg: "La contraseña debe tener al menos 6 caracteres" });
+
+    if (password.length > 15)
+      return res
+        .status(400)
+        .json({ msg: "La contraseña no puede tener más de 15 caracteres" });
 
     const salt = bcryptjs.genSaltSync(10);
     usuario.password = bcryptjs.hashSync(password, salt);
