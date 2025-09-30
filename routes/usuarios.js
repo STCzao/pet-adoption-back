@@ -16,7 +16,8 @@ const { esAdminRole } = require("../middlewares/validar-roles");
 
 const router = Router();
 
-// Rutas públicas
+// ------------------ Rutas públicas ------------------
+// Crear usuario
 router.post(
   "/",
   [
@@ -24,19 +25,28 @@ router.post(
       min: 3,
       max: 15,
     }),
+    check("nombre", "El nombre solo puede contener letras y espacios").matches(
+      /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/
+    ),
+    check("correo", "El correo debe ser válido").isEmail(),
     check(
       "password",
       "La contraseña debe tener entre 6 y 15 caracteres"
     ).isLength({ min: 6, max: 15 }),
-    check("correo", "El correo debe ser válido").isEmail(),
-    check("telefono", "El teléfono es obligatorio").not().isEmpty(),
+    check(
+      "password",
+      "La contraseña debe incluir al menos una letra, un número y puede contener caracteres especiales"
+    ).matches(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{6,15}$/),
+    check("telefono", "El teléfono debe contener entre 7 y 15 dígitos").matches(
+      /^[0-9]{7,15}$/
+    ),
     validarCampos,
   ],
   usuariosPost
 );
 
-// Rutas protegidas - Perfil personal
-router.get("/mi-perfil", [validarJWT], miPerfilGet);
+// ------------------ Perfil propio ------------------
+router.get("/mi-perfil", validarJWT, miPerfilGet);
 
 router.put(
   "/mi-perfil",
@@ -45,13 +55,18 @@ router.put(
     check("nombre", "El nombre debe tener entre 3 y 15 caracteres")
       .optional()
       .isLength({ min: 3, max: 15 }),
-    check("telefono", "El teléfono es obligatorio").optional().not().isEmpty(),
+    check("nombre", "El nombre solo puede contener letras y espacios")
+      .optional()
+      .matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/),
+    check("telefono", "El teléfono debe contener entre 7 y 15 dígitos")
+      .optional()
+      .matches(/^[0-9]{7,15}$/),
     validarCampos,
   ],
   miPerfilPut
 );
 
-// Rutas protegidas - Solo admin
+// ------------------ Rutas protegidas - Solo admin ------------------
 router.get("/", [validarJWT, esAdminRole], usuariosGet);
 
 router.get(
