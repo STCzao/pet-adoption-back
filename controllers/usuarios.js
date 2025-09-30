@@ -23,6 +23,22 @@ const usuariosPost = async (req, res = response) => {
   const { nombre, correo, password, rol, telefono, direccion } = req.body;
 
   try {
+    if (password.length < 6) {
+      return res
+        .status(400)
+        .json({
+          msg: "La contraseña es demasiado corta. Debe tener al menos 6 caracteres.",
+        });
+    }
+
+    if (password.length > 15) {
+      return res
+        .status(400)
+        .json({
+          msg: "La contraseña es demasiado larga. No puede tener más de 15 caracteres.",
+        });
+    }
+
     const usuario = new Usuario({
       nombre,
       correo,
@@ -31,12 +47,10 @@ const usuariosPost = async (req, res = response) => {
       telefono,
       direccion,
     });
-
     const salt = bcryptjs.genSaltSync();
     usuario.password = bcryptjs.hashSync(password, salt);
 
     await usuario.save();
-
     res.json({ usuario });
   } catch (error) {
     if (error.code === 11000) {
@@ -44,7 +58,6 @@ const usuariosPost = async (req, res = response) => {
         .status(400)
         .json({ msg: `El correo ${correo} ya está registrado` });
     }
-
     console.error(error);
     res.status(500).json({ msg: "Error al registrar usuario" });
   }
@@ -62,6 +75,11 @@ const usuariosPut = async (req, res = response) => {
   }
 
   if (password) {
+    if (password.length < 6 || password.length > 15) {
+      return res
+        .status(400)
+        .json({ msg: "La contraseña debe tener entre 6 y 15 caracteres" });
+    }
     const salt = bcryptjs.genSaltSync();
     resto.password = bcryptjs.hashSync(password, salt);
   }
@@ -132,6 +150,11 @@ const miPerfilPut = async (req, res = response) => {
   }
 
   if (password) {
+    if (password.length < 6 || password.length > 15) {
+      return res
+        .status(400)
+        .json({ msg: "La contraseña debe tener entre 6 y 15 caracteres" });
+    }
     const salt = bcryptjs.genSaltSync();
     resto.password = bcryptjs.hashSync(password, salt);
   }
