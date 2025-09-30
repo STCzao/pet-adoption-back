@@ -28,8 +28,8 @@ router.post(
   [
     check(
       "password",
-      "La contraseña debe tener al menos 6 caracteres"
-    ).isLength({ min: 6 }),
+      "La contraseña debe tener entre 6 y 15 caracteres"
+    ).isLength({ min: 6, max: 15}),
     validarCampos,
   ],
   resetPassword
