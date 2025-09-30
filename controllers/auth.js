@@ -43,7 +43,7 @@ const forgotPassword = async (req, res = response) => {
       return res.status(400).json({ msg: "Usuario no encontrado" });
     }
 
-    // Generar token
+    // Generar token y expiracion
     const token = crypto.randomBytes(32).toString("hex");
     const exp = Date.now() + 3600000; // 1 hora
 
@@ -51,11 +51,17 @@ const forgotPassword = async (req, res = response) => {
     usuario.resetTokenExp = exp;
     await usuario.save();
 
-    // Enviar correo con el token
+    // URL hacia el front (variable de entorno)
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${token}`;
+
+    // Enviar correo con el link
     await enviarEmail(
       usuario.correo,
       "Recuperar contraseña",
-      `Tu token es: ${token}`
+      `<p>Hola ${usuario.nombre},</p>
+       <p>Haz click en el siguiente enlace para restablecer tu contraseña:</p>
+       <a href="${resetUrl}" target="_blank">${resetUrl}</a>
+       <p>Este enlace expirará en 1 hora.</p>`
     );
 
     res.json({ msg: "Se envió un correo para restablecer la contraseña" });
