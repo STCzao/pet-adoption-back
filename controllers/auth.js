@@ -127,8 +127,21 @@ const resetPassword = async (req, res = response) => {
   }
 };
 
+// ----------------- REVALIDAR TOKEN / OBTENER USUARIO -----------------------
+const revalidarToken = async (req, res = response) => {
+  try {
+    const usuario = req.usuario; // viene del middleware validarJWT
+    const token = await generarJWT(usuario.id); // opcional: generar token nuevo
+    res.json({ usuario, token });
+  } catch (error) {
+    console.log("Error en revalidarToken:", error);
+    res.status(500).json({ msg: "Error en el servidor" });
+  }
+};
+
 module.exports = {
   login,
   forgotPassword,
   resetPassword,
+  revalidarToken,
 };

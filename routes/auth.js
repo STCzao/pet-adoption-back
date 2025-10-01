@@ -1,10 +1,17 @@
 const { Router } = require("express");
 const { check } = require("express-validator");
-const { login, forgotPassword, resetPassword } = require("../controllers/auth");
+const {
+  login,
+  forgotPassword,
+  resetPassword,
+  revalidarToken,
+} = require("../controllers/auth");
 const { validarCampos } = require("../middlewares/validar-campos");
+const { validarJWT } = require("../middlewares/validar-jwt");
 
 const router = Router();
 
+// Login
 router.post(
   "/login",
   [
@@ -15,12 +22,14 @@ router.post(
   login
 );
 
+// Forgot password
 router.post(
   "/forgot-password",
   [check("correo", "Debe ser un correo válido").isEmail(), validarCampos],
   forgotPassword
 );
 
+// Reset password
 router.post(
   "/reset-password/:token",
   [
@@ -29,5 +38,8 @@ router.post(
   ],
   resetPassword
 );
+
+// 🔹 Obtener usuario logueado / revalidar token
+router.get("/me", validarJWT, revalidarToken);
 
 module.exports = router;
