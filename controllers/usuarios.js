@@ -40,14 +40,23 @@ const usuariosPost = async (req, res = response) => {
     res.json({ usuario });
   } catch (error) {
     if (error.code === 11000) {
-      return res
-        .status(400)
-        .json({ msg: `El correo ${correo} ya está registrado` });
+      return res.status(400).json({
+        msg: `El correo ${correo} ya está registrado`,
+        errors: {
+          correo: `El correo ${correo} ya está registrado`,
+        },
+      });
     }
 
     if (error.name === "ValidationError") {
-      const mensajes = Object.values(error.errors).map((err) => err.message);
-      return res.status(400).json({ msg: mensajes.join(", ") });
+      const errors = {};
+      Object.keys(error.errors).forEach((key) => {
+        errors[key] = error.errors[key].message;
+      });
+      return res.status(400).json({
+        msg: "Error de validación",
+        errors,
+      });
     }
 
     console.error(error);
@@ -68,9 +77,12 @@ const usuariosPut = async (req, res = response) => {
 
   if (password) {
     if (password.length < 6 || password.length > 15) {
-      return res
-        .status(400)
-        .json({ msg: "La contraseña debe tener entre 6 y 15 caracteres" });
+      return res.status(400).json({
+        msg: "La contraseña debe tener entre 6 y 15 caracteres",
+        errors: {
+          password: "La contraseña debe tener entre 6 y 15 caracteres",
+        },
+      });
     }
     const salt = bcryptjs.genSaltSync();
     resto.password = bcryptjs.hashSync(password, salt);
@@ -145,9 +157,12 @@ const miPerfilPut = async (req, res = response) => {
 
   if (password) {
     if (password.length < 6 || password.length > 15) {
-      return res
-        .status(400)
-        .json({ msg: "La contraseña debe tener entre 6 y 15 caracteres" });
+      return res.status(400).json({
+        msg: "La contraseña debe tener entre 6 y 15 caracteres",
+        errors: {
+          password: "La contraseña debe tener entre 6 y 15 caracteres",
+        },
+      });
     }
     const salt = bcryptjs.genSaltSync();
     resto.password = bcryptjs.hashSync(password, salt);
