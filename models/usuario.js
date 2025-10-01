@@ -30,10 +30,6 @@ const UsuarioSchema = Schema({
       "El teléfono debe contener entre 7 y 15 dígitos numéricos",
     ],
   },
-  direccion: {
-    type: String,
-    maxlength: [30, "La dirección no puede superar los 30 caracteres"],
-  },
   img: { type: String },
   rol: {
     type: String,
