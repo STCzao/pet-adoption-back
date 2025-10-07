@@ -107,7 +107,12 @@ const PublicacionSchema = Schema({
     required: true,
   },
   img: {
-    type: [String],
+    type: String,
+    required: [true, "La imagen es obligatoria"],
+    match: [
+      /^https:\/\/res\.cloudinary\.com\/.+\/.+\.(jpg|jpeg|png|webp)$/,
+      "La URL de imagen no es válida",
+    ],
   },
   fechaCreacion: {
     type: Date,
