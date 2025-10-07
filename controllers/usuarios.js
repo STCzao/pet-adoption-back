@@ -144,8 +144,28 @@ const usuariosDashboard = async (req, res = response) => {
 
 // ----------------- PERFIL PROPIO ----------------------
 const miPerfilGet = async (req, res = response) => {
-  const usuario = await Usuario.findById(req.usuario._id).select("-password");
-  res.json(usuario);
+  try {
+    const usuario = await Usuario.findById(req.usuario._id).select("-password");
+
+    if (!usuario) {
+      return res.status(404).json({
+        msg: "Usuario no encontrado",
+      });
+    }
+
+    if (!usuario.estado) {
+      return res.status(400).json({
+        msg: "Usuario inactivo",
+      });
+    }
+
+    res.json(usuario);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      msg: "Error del servidor al obtener perfil",
+    });
+  }
 };
 
 const miPerfilPut = async (req, res = response) => {
