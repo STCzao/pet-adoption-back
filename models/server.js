@@ -29,8 +29,15 @@ class Server {
   }
 
   middlewares() {
-    // CORS
-    this.app.use(cors());
+    // CORS - CONFIGURACIÓN COMPLETA
+    this.app.use(
+      cors({
+        origin: ["http://localhost:5173", "http://localhost:3000"],
+        credentials: true,
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "x-token", "Authorization"],
+      })
+    );
 
     // Lectura y parseo del body
     this.app.use(express.json());
@@ -45,7 +52,7 @@ class Server {
     this.app.use(this.paths.publicaciones, require("../routes/publicaciones"));
     this.app.use(this.paths.buscar, require("../routes/buscar"));
   }
-  
+
   listen() {
     this.app.listen(this.port, () => {
       console.log("Servidor corriendo en puerto:", this.port);
