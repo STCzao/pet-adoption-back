@@ -149,6 +149,8 @@ const publicacionesPost = async (req, res = response) => {
       energia: body.energia ? normalizarTexto(body.energia) : undefined,
       castrado: body.castrado,
       whatsapp: body.whatsapp, // Mantener formato original
+      img: body.img,
+      fecha: fecha.img,
       usuario: req.usuario._id,
     };
 
