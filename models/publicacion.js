@@ -42,7 +42,7 @@ const PublicacionSchema = Schema({
     maxlength: [50, "El lugar no puede tener más de 50 caracteres"],
   },
   fecha: {
-    type: Date,
+    type: String,
     required: function () {
       return this.tipo === "PERDIDO" || this.tipo === "ENCONTRADO";
     },
