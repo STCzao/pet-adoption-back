@@ -150,7 +150,7 @@ const publicacionesPost = async (req, res = response) => {
       castrado: body.castrado,
       whatsapp: body.whatsapp, // Mantener formato original
       img: body.img,
-      fecha: fecha.img,
+      fecha: fecha.fecha,
       usuario: req.usuario._id,
     };
 
