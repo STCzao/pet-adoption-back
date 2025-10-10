@@ -149,20 +149,26 @@ const miPerfilGet = async (req, res = response) => {
 
     if (!usuario) {
       return res.status(404).json({
+        ok: false,
         msg: "Usuario no encontrado",
       });
     }
 
     if (!usuario.estado) {
       return res.status(400).json({
+        ok: false,
         msg: "Usuario inactivo",
       });
     }
 
-    res.json(usuario);
+    return res.json({
+      ok: true,
+      usuario,
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
+    console.error("Error en miPerfilGet:", error);
+    return res.status(500).json({
+      ok: false,
       msg: "Error del servidor al obtener perfil",
     });
   }
