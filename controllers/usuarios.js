@@ -230,10 +230,11 @@ const miPerfilPut = async (req, res = response) => {
           errors: { nombre: "El nombre debe tener al menos 3 caracteres" },
         });
       }
-      if (nombreTrimmed.length > 15) {
+      if (nombreTrimmed.length > 40) {
+        // Actualizado a 40 caracteres
         return res.status(400).json({
-          msg: "El nombre no puede tener más de 15 caracteres",
-          errors: { nombre: "El nombre no puede tener más de 15 caracteres" },
+          msg: "El nombre no puede tener más de 40 caracteres",
+          errors: { nombre: "El nombre no puede tener más de 40 caracteres" },
         });
       }
       if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(nombreTrimmed)) {

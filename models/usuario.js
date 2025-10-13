@@ -5,7 +5,7 @@ const UsuarioSchema = Schema({
     type: String,
     required: [true, "El nombre es obligatorio"],
     minlength: [3, "El nombre debe tener al menos 3 caracteres"],
-    maxlength: [15, "El nombre no puede tener más de 15 caracteres"],
+    maxlength: [40, "El nombre no puede tener más de 40 caracteres"], // Cambiado de 15 a 40
     match: [
       /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/,
       "El nombre solo puede contener letras y espacios",
@@ -16,6 +16,7 @@ const UsuarioSchema = Schema({
     required: [true, "El correo es obligatorio"],
     unique: true,
     match: [/^\S+@\S+\.\S+$/, "Debe ser un correo válido"],
+    maxlength: [35, "El correo no puede tener más de 35 caracteres"],
   },
   password: {
     type: String,
