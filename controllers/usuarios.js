@@ -175,29 +175,154 @@ const miPerfilGet = async (req, res = response) => {
 };
 
 const miPerfilPut = async (req, res = response) => {
-  const { password, google, correo, rol, ...resto } = req.body;
+  try {
+    // Solo permitir nombre y teléfono - ignorar otros campos
+    const { nombre, telefono, password, correo, rol, ...camposNoPermitidos } =
+      req.body;
 
-  if (rol && req.usuario.rol !== "ADMIN_ROLE") {
-    return res.status(403).json({ msg: "No puede cambiar su rol" });
-  }
-
-  if (password) {
-    if (password.length < 6 || password.length > 15) {
+    // Rechazar si se envían campos no permitidos
+    const camposNoPermitidosKeys = Object.keys(camposNoPermitidos);
+    if (camposNoPermitidosKeys.length > 0) {
       return res.status(400).json({
-        msg: "La contraseña debe tener entre 6 y 15 caracteres",
+        msg: `Campos no permitidos para actualización: ${camposNoPermitidosKeys.join(
+          ", "
+        )}`,
         errors: {
-          password: "La contraseña debe tener entre 6 y 15 caracteres",
+          general: `Solo se permiten actualizar nombre y teléfono`,
         },
       });
     }
-    const salt = bcryptjs.genSaltSync();
-    resto.password = bcryptjs.hashSync(password, salt);
-  }
 
-  const usuario = await Usuario.findByIdAndUpdate(req.usuario._id, resto, {
-    new: true,
-  }).select("-password");
-  res.json(usuario);
+    // Rechazar si se intenta modificar correo o rol
+    if (correo !== undefined) {
+      return res.status(400).json({
+        msg: "No se puede modificar el correo electrónico",
+        errors: {
+          correo: "El correo electrónico no se puede modificar",
+        },
+      });
+    }
+
+    if (rol !== undefined && req.usuario.rol !== "ADMIN_ROLE") {
+      return res.status(403).json({
+        msg: "No tiene permisos para cambiar el rol",
+        errors: {
+          rol: "No puede cambiar su rol",
+        },
+      });
+    }
+
+    const updateData = {};
+
+    // Validar y agregar nombre si se envió
+    if (nombre !== undefined) {
+      const nombreTrimmed = nombre.trim();
+
+      if (!nombreTrimmed) {
+        return res.status(400).json({
+          msg: "El nombre es obligatorio",
+          errors: { nombre: "El nombre es obligatorio" },
+        });
+      }
+      if (nombreTrimmed.length < 3) {
+        return res.status(400).json({
+          msg: "El nombre debe tener al menos 3 caracteres",
+          errors: { nombre: "El nombre debe tener al menos 3 caracteres" },
+        });
+      }
+      if (nombreTrimmed.length > 15) {
+        return res.status(400).json({
+          msg: "El nombre no puede tener más de 15 caracteres",
+          errors: { nombre: "El nombre no puede tener más de 15 caracteres" },
+        });
+      }
+      if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(nombreTrimmed)) {
+        return res.status(400).json({
+          msg: "El nombre solo puede contener letras y espacios",
+          errors: { nombre: "El nombre solo puede contener letras y espacios" },
+        });
+      }
+      updateData.nombre = nombreTrimmed;
+    }
+
+    // Validar y agregar teléfono si se envió
+    if (telefono !== undefined) {
+      const telefonoTrimmed = telefono.trim();
+
+      if (!telefonoTrimmed) {
+        return res.status(400).json({
+          msg: "El teléfono es obligatorio",
+          errors: { telefono: "El teléfono es obligatorio" },
+        });
+      }
+      if (!/^[0-9]{7,15}$/.test(telefonoTrimmed)) {
+        return res.status(400).json({
+          msg: "El teléfono debe contener entre 7 y 15 dígitos",
+          errors: {
+            telefono: "El teléfono debe contener entre 7 y 15 dígitos",
+          },
+        });
+      }
+      updateData.telefono = telefonoTrimmed;
+    }
+
+    // Si no hay campos válidos para actualizar
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({
+        msg: "No hay cambios válidos para guardar",
+        errors: {
+          general: "No se proporcionaron campos válidos para actualizar",
+        },
+      });
+    }
+
+    // Actualizar usuario
+    const usuario = await Usuario.findByIdAndUpdate(
+      req.usuario._id,
+      updateData,
+      {
+        new: true,
+        runValidators: true,
+      }
+    ).select("-password -resetToken -resetTokenExp");
+
+    if (!usuario) {
+      return res.status(404).json({
+        msg: "Usuario no encontrado",
+      });
+    }
+
+    res.json({
+      ok: true,
+      usuario,
+      msg: "Perfil actualizado exitosamente",
+    });
+  } catch (error) {
+    console.error("Error en miPerfilPut:", error);
+
+    // Manejar error de duplicado de correo (aunque no debería pasar)
+    if (error.code === 11000) {
+      return res.status(400).json({
+        msg: "El correo electrónico ya está en uso",
+        errors: { correo: "El correo electrónico ya está en uso" },
+      });
+    }
+
+    if (error.name === "ValidationError") {
+      const errors = {};
+      Object.keys(error.errors).forEach((key) => {
+        errors[key] = error.errors[key].message;
+      });
+      return res.status(400).json({
+        msg: "Error de validación de datos",
+        errors,
+      });
+    }
+
+    res.status(500).json({
+      msg: "Error interno del servidor al actualizar perfil",
+    });
+  }
 };
 
 module.exports = {

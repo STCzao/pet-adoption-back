@@ -45,19 +45,19 @@ router.put(
   "/mi-perfil",
   [
     validarJWT,
+    // Validaciones opcionales solo para los campos que se envíen
     check("nombre", "El nombre debe tener entre 3 y 15 caracteres")
       .optional()
       .isLength({ min: 3, max: 15 }),
-    check("telefono", "El teléfono es obligatorio").optional().not().isEmpty(),
-    check("password", "La contraseña debe tener entre 6 y 15 caracteres")
+    check("telefono", "El teléfono debe contener entre 7 y 15 dígitos")
       .optional()
-      .isLength({ min: 6, max: 15 }),
+      .matches(/^[0-9]{7,15}$/),
     validarCampos,
   ],
   miPerfilPut
 );
 
-// Rutas protegidas - Solo admin
+// ... resto de las rutas se mantienen igual
 router.get("/", [validarJWT, esAdminRole], usuariosGet);
 
 router.get(
