@@ -20,9 +20,9 @@ const router = Router();
 router.post(
   "/",
   [
-    check("nombre", "El nombre debe tener entre 3 y 15 caracteres").isLength({
+    check("nombre", "El nombre debe tener entre 3 y 40 caracteres").isLength({
       min: 3,
-      max: 15,
+      max: 40,
     }),
     check(
       "password",
@@ -46,9 +46,9 @@ router.put(
   [
     validarJWT,
     // Validaciones opcionales solo para los campos que se envíen
-    check("nombre", "El nombre debe tener entre 3 y 15 caracteres")
+    check("nombre", "El nombre debe tener entre 3 y 40 caracteres")
       .optional()
-      .isLength({ min: 3, max: 15 }),
+      .isLength({ min: 3, max: 40 }),
     check("telefono", "El teléfono debe contener entre 7 y 15 dígitos")
       .optional()
       .matches(/^[0-9]{7,15}$/),
@@ -57,7 +57,7 @@ router.put(
   miPerfilPut
 );
 
-// ... resto de las rutas se mantienen igual
+// Rutas protegidas - Solo admin
 router.get("/", [validarJWT, esAdminRole], usuariosGet);
 
 router.get(
@@ -77,6 +77,9 @@ router.put(
   [
     validarJWT,
     check("id", "No es un ID válido").isMongoId(),
+    check("nombre", "El nombre debe tener entre 3 y 40 caracteres")
+      .optional()
+      .isLength({ min: 3, max: 40 }),
     check("password", "La contraseña debe tener entre 6 y 15 caracteres")
       .optional()
       .isLength({ min: 6, max: 15 }),
