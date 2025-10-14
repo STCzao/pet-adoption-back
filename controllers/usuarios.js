@@ -94,22 +94,44 @@ const usuariosPut = async (req, res = response) => {
   res.json(usuario);
 };
 
-// ----------------- ELIMINAR USUARIO --------------------
 const usuariosDelete = async (req, res = response) => {
   const { id } = req.params;
 
-  if (req.usuario.rol !== "ADMIN_ROLE") {
+  // Permitir que los usuarios eliminen su propia cuenta O que los admins eliminen cualquier cuenta
+  if (req.usuario.rol !== "ADMIN_ROLE" && req.usuario._id.toString() !== id) {
     return res
       .status(403)
-      .json({ msg: "No tiene permisos para eliminar usuarios" });
+      .json({ msg: "No tiene permisos para eliminar este usuario" });
   }
 
+  // Si el usuario se está eliminando a sí mismo, cerrar sesión
+  if (req.usuario._id.toString() === id) {
+    const usuario = await Usuario.findByIdAndUpdate(
+      id,
+      { estado: false },
+      { new: true }
+    );
+
+    return res.json({
+      ok: true,
+      msg: "Cuenta eliminada correctamente",
+      usuario,
+      logout: true, // Indicar que debe cerrar sesión
+    });
+  }
+
+  // Si es admin eliminando a otro usuario
   const usuario = await Usuario.findByIdAndUpdate(
     id,
     { estado: false },
     { new: true }
   );
-  res.json({ msg: "Usuario eliminado correctamente", usuario });
+
+  res.json({
+    ok: true,
+    msg: "Usuario eliminado correctamente",
+    usuario,
+  });
 };
 
 // ----------------- OBTENER USUARIO POR ID ----------------
