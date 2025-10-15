@@ -94,6 +94,26 @@ const usuariosPut = async (req, res = response) => {
   res.json(usuario);
 };
 
+const cambiarUsuarioEstado = async (id, estado) => {
+  const { id } = req.params;
+  const { estado } = req.body;
+
+  const usuario = await Usuario.findByIdAndUpdate(
+    id,
+    { estado },
+    { new: true }
+  );
+
+  if (usuario === "ADMIN_ROLE") {
+    return res.status(403).json({
+      ok: false,
+      msg: "No se puede cambiar el estado de un administrador",
+    });
+  }
+
+  res.json({ usuario });
+};
+
 const usuariosDelete = async (req, res = response) => {
   const { id } = req.params;
 
@@ -352,6 +372,7 @@ module.exports = {
   usuariosGet,
   usuariosPost,
   usuariosPut,
+  cambiarUsuarioEstado,
   usuariosDelete,
   usuarioGet,
   usuariosDashboard,
