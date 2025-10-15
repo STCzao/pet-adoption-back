@@ -6,6 +6,7 @@ const {
   publicacionGet,
   publicacionesPost,
   publicacionesPut,
+  publicacionesEstadoPut,
   publicacionesDelete,
   obtenerContactoPublicacion,
   publicacionesAdminGet,
@@ -92,6 +93,25 @@ router.put(
   "/:id",
   [validarJWT, check("id", "No es un ID válido").isMongoId(), validarCampos],
   publicacionesPut
+);
+
+router.put(
+  "/:id/estado",
+  [
+    validarJWT,
+    esAdminRole, // Solo admin puede cambiar estados
+    check("id", "No es un ID válido").isMongoId(),
+    check("estado", "El estado es obligatorio").not().isEmpty(),
+    check("estado").isIn([
+      "ACTIVO",
+      "INACTIVO",
+      "ENCONTRADO",
+      "ADOPTADO",
+      "VISTO",
+    ]),
+    validarCampos,
+  ],
+  publicacionesEstadoPut
 );
 
 router.delete(
