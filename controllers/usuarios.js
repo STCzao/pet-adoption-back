@@ -94,24 +94,30 @@ const usuariosPut = async (req, res = response) => {
   res.json(usuario);
 };
 
-const cambiarUsuarioEstado = async (id, estado) => {
+const cambiarUsuarioEstado = async (req, res = response) => {
   const { id } = req.params;
   const { estado } = req.body;
 
-  const usuario = await Usuario.findByIdAndUpdate(
-    id,
-    { estado },
-    { new: true }
-  );
+  const usuario = await Usuario.findById(id);
 
-  if (usuario === "ADMIN_ROLE") {
+  if (!usuario) {
+    return res.status(404).json({
+      ok: false,
+      msg: "Usuario no encontrado",
+    });
+  }
+
+  if (usuario.rol === "ADMIN_ROLE") {
     return res.status(403).json({
       ok: false,
       msg: "No se puede cambiar el estado de un administrador",
     });
   }
 
-  res.json({ usuario });
+  usuario.estado = estado;
+  await usuario.save();
+
+  res.json({ ok: true, usuario });
 };
 
 const usuariosDelete = async (req, res = response) => {
