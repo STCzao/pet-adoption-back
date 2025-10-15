@@ -4,6 +4,7 @@ const {
   usuariosGet,
   usuariosPost,
   usuariosPut,
+  cambiarUsuarioEstado,
   usuariosDelete,
   usuarioGet,
   usuariosDashboard,
@@ -88,13 +89,20 @@ router.put(
   usuariosPut
 );
 
-router.delete(
-  "/:id",
+router.put(
+  "/:id/estado",
   [
     validarJWT,
+    esAdminRole,
     check("id", "No es un ID válido").isMongoId(),
     validarCampos,
   ],
+  cambiarUsuarioEstado
+);
+
+router.delete(
+  "/:id",
+  [validarJWT, check("id", "No es un ID válido").isMongoId(), validarCampos],
   usuariosDelete
 );
 
