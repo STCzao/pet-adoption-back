@@ -289,11 +289,7 @@ const publicacionesDelete = async (req, res = response) => {
       });
     }
 
-    const publicacionEliminada = await Publicacion.findByIdAndUpdate(
-      id,
-      { estado: "INACTIVO" },
-      { new: true }
-    );
+    const publicacionEliminada = await Publicacion.findByIdAndDelete(id);
 
     res.json({
       success: true,
