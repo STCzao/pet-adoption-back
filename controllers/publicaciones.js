@@ -219,53 +219,6 @@ const publicacionesPut = async (req, res = response) => {
       });
     }
 
-    const publicacionesEstadoPut = async (req, res = response) => {
-      try {
-        const { id } = req.params;
-        const { estado } = req.body;
-
-        // Buscar publicación
-        const publicacion = await Publicacion.findById(id);
-
-        if (!publicacion) {
-          return res.status(404).json({
-            success: false,
-            msg: "Publicación no encontrada",
-          });
-        }
-
-        // Verificar permisos: solo dueño o admin
-        if (
-          publicacion.usuario.toString() !== req.usuario._id.toString() &&
-          req.usuario.rol !== "ADMIN_ROLE"
-        ) {
-          return res.status(403).json({
-            success: false,
-            msg: "No tiene permisos para cambiar el estado de esta publicación",
-          });
-        }
-
-        // Actualizar solo el estado
-        const publicacionActualizada = await Publicacion.findByIdAndUpdate(
-          id,
-          { estado: normalizarTexto(estado) },
-          { new: true }
-        ).populate("usuario", "nombre");
-
-        res.json({
-          success: true,
-          msg: "Estado actualizado exitosamente",
-          publicacion: publicacionActualizada,
-        });
-      } catch (error) {
-        console.error(error);
-        res.status(500).json({
-          success: false,
-          msg: "Error al actualizar el estado",
-        });
-      }
-    };
-
     // Normalizar campos de texto (excepto whatsapp)
     const datosNormalizados = {};
     Object.keys(resto).forEach((key) => {
@@ -307,6 +260,54 @@ const publicacionesPut = async (req, res = response) => {
     res.status(500).json({
       success: false,
       msg: "Error al actualizar la publicación",
+    });
+  }
+};
+
+// Actualizar estado de publicación (solo dueño o admin)
+const publicacionesEstadoPut = async (req, res = response) => {
+  try {
+    const { id } = req.params;
+    const { estado } = req.body;
+
+    // Buscar publicación
+    const publicacion = await Publicacion.findById(id);
+
+    if (!publicacion) {
+      return res.status(404).json({
+        success: false,
+        msg: "Publicación no encontrada",
+      });
+    }
+
+    // Verificar permisos: solo dueño o admin
+    if (
+      publicacion.usuario.toString() !== req.usuario._id.toString() &&
+      req.usuario.rol !== "ADMIN_ROLE"
+    ) {
+      return res.status(403).json({
+        success: false,
+        msg: "No tiene permisos para cambiar el estado de esta publicación",
+      });
+    }
+
+    // Actualizar solo el estado
+    const publicacionActualizada = await Publicacion.findByIdAndUpdate(
+      id,
+      { estado: normalizarTexto(estado) },
+      { new: true }
+    ).populate("usuario", "nombre");
+
+    res.json({
+      success: true,
+      msg: "Estado actualizado exitosamente",
+      publicacion: publicacionActualizada,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      msg: "Error al actualizar el estado",
     });
   }
 };
