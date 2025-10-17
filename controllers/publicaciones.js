@@ -74,8 +74,18 @@ const publicacionesUsuarioGet = async (req, res = response) => {
   try {
     const { id } = req.params;
 
-    // Solo el usuario dueño o admin puede ver todas sus publicaciones (incluyendo INACTIVO)
-    if (req.usuario.rol !== "ADMIN_ROLE" && req.usuario._id.toString() !== id) {
+    console.log("Solicitud de publicaciones para usuario:", {
+      usuarioAutenticado: req.usuario._id.toString(),
+      usuarioSolicitado: id,
+      rol: req.usuario.rol,
+    });
+
+    // Permitir al usuario ver sus propias publicaciones O si es admin
+    const puedeVer =
+      req.usuario.rol === "ADMIN_ROLE" || req.usuario._id.toString() === id;
+
+    if (!puedeVer) {
+      console.log("Acceso denegado - IDs no coinciden");
       return res.status(403).json({
         success: false,
         msg: "No tiene permisos para ver estas publicaciones",
@@ -86,12 +96,16 @@ const publicacionesUsuarioGet = async (req, res = response) => {
       .populate("usuario", "nombre")
       .sort({ fechaCreacion: -1 });
 
+    console.log(
+      `Encontradas ${publicaciones.length} publicaciones para usuario ${id}`
+    );
+
     res.json({
       success: true,
       publicaciones,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Error en publicacionesUsuarioGet:", error);
     res.status(500).json({
       success: false,
       msg: "Error al obtener publicaciones del usuario",
