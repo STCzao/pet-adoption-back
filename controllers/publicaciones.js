@@ -152,7 +152,7 @@ const publicacionesPost = async (req, res = response) => {
       energia: body.energia ? normalizarTexto(body.energia) : undefined,
       castrado: body.castrado,
       whatsapp: body.whatsapp, // Mantener formato original
-      img: body.img,
+      img: body.img ? body.img.toLowerCase() : undefined,
       fecha: body.fecha,
       usuario: req.usuario._id,
     };
@@ -226,7 +226,9 @@ const publicacionesPut = async (req, res = response) => {
     const datosNormalizados = {};
     Object.keys(resto).forEach((key) => {
       if (key === "whatsapp") {
-        datosNormalizados[key] = resto[key]; // Mantener formato original
+        datosNormalizados[key] = resto[key];
+      } else if (key === "img" && resto[key]) {
+        datosNormalizados[key] = resto[key].toLowerCase();
       } else if (typeof resto[key] === "string" && resto[key].trim() !== "") {
         datosNormalizados[key] = normalizarTexto(resto[key]);
       } else {
