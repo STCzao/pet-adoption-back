@@ -5,7 +5,8 @@ const {
   crearCasoAyuda,
   eliminarCasoAyuda,
 } = require("../controllers/casosAyuda");
-const { validarJWT, validarCampos } = require("../middlewares");
+const { validarJWT } = require("../middlewares/validar-jwt");
+const { validarCampos } = require("../middlewares/validar-campos");
 
 const router = Router();
 
