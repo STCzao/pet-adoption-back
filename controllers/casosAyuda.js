@@ -1,5 +1,5 @@
 const { response } = require("express");
-const CasoAyuda = require("../models/CasoAyuda");
+const CasoAyuda = require("../models/CasosAyuda");
 
 // Obtener todos los casos de ayuda
 const obtenerCasosAyuda = async (req, res = response) => {

@@ -1,5 +1,5 @@
 const { response } = require("express");
-const CasoExito = require("../models/CasoExito");
+const CasoExito = require("../models/CasosExito");
 
 // Obtener todos los casos de exito
 const obtenerCasosExito = async (req, res = response) => {
