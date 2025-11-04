@@ -39,7 +39,7 @@ router.post(
   resetPassword
 );
 
-// 🔹 Obtener usuario logueado / revalidar token
+//Obtener usuario logueado / revalidar token
 router.get("/me", validarJWT, revalidarToken);
 
 module.exports = router;
