@@ -15,6 +15,36 @@ const obtenerCasosAyuda = async (req, res = response) => {
   }
 };
 
+// Obtener casos de ayuda por usuario
+const obtenerCasosAyudaUsuario = async (req, res = response) => {
+  try {
+    const { id } = req.params;
+
+    const casos = await CasoAyuda.find({ usuario: id })
+      .populate("usuario", "nombre img rol")
+      .sort({ createdAt: -1 });
+
+    if (!casos || casos.length === 0) {
+      return res.status(404).json({
+        ok: false,
+        msg: "No se encontraron casos de ayuda para este usuario",
+      });
+    }
+
+    res.json({
+      ok: true,
+      total: casos.length,
+      casos,
+    });
+  } catch (error) {
+    console.error("Error al obtener casos por usuario:", error);
+    res.status(500).json({
+      ok: false,
+      msg: "Error interno del servidor",
+    });
+  }
+};
+
 // Crear un nuevo caso de ayuda
 const crearCasoAyuda = async (req, res = response) => {
   try {
@@ -46,7 +76,6 @@ const eliminarCasoAyuda = async (req, res = response) => {
       return res.status(404).json({ ok: false, msg: "Caso no encontrado" });
     }
 
-    // Verificar permisos
     if (
       caso.usuario.toString() !== usuarioAuth._id.toString() &&
       usuarioAuth.rol !== "ADMIN_ROLE"
@@ -57,7 +86,7 @@ const eliminarCasoAyuda = async (req, res = response) => {
       });
     }
 
-    await caso.deleteOne(); // Borrado fisico
+    await caso.deleteOne();
 
     res.json({ ok: true, msg: "Caso de ayuda eliminado permanentemente" });
   } catch (error) {
@@ -68,6 +97,7 @@ const eliminarCasoAyuda = async (req, res = response) => {
 
 module.exports = {
   obtenerCasosAyuda,
+  obtenerCasosAyudaUsuario,
   crearCasoAyuda,
   eliminarCasoAyuda,
 };
