@@ -25,9 +25,10 @@ const obtenerCasosAyudaUsuario = async (req, res = response) => {
       .sort({ createdAt: -1 });
 
     if (!casos || casos.length === 0) {
-      return res.status(404).json({
-        ok: false,
-        msg: "No se encontraron casos de ayuda para este usuario",
+      return res.json({
+        ok: true,
+        total: 0,
+        casos: [],
       });
     }
 
