@@ -31,10 +31,14 @@ class Server {
   }
 
   middlewares() {
-    // CORS - CONFIGURACIÓN COMPLETA
+    
     this.app.use(
       cors({
-        origin: ["http://localhost:5173", "http://localhost:3000"],
+        origin: [
+          "http://localhost:5173",
+          "http://localhost:3000",
+          "https://perdidosyadopciones.vercel.app", // dominio de producción
+        ],
         credentials: true,
         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         allowedHeaders: ["Content-Type", "x-token", "Authorization"],
