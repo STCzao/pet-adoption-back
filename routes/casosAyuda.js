@@ -13,6 +13,8 @@ const router = Router();
 // Obtener todos los casos
 router.get("/", obtenerCasosAyuda);
 
+router.get("/usuario/:id", [validarJWT], obtenerCasosAyudaUsuario);
+
 // Crear un nuevo caso (requiere autenticacion)
 router.post(
   "/",
