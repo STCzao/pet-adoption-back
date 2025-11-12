@@ -4,6 +4,7 @@ const {
   obtenerCasosAyuda,
   crearCasoAyuda,
   eliminarCasoAyuda,
+  obtenerCasosAyudaUsuario,
 } = require("../controllers/casosAyuda");
 const { validarJWT } = require("../middlewares/validar-jwt");
 const { validarCampos } = require("../middlewares/validar-campos");
