@@ -4,18 +4,9 @@ const Usuario = require("../models/usuario");
 
 // ----------------- OBTENER USUARIOS ---------------------
 const usuariosGet = async (req, res = response) => {
-  const { limite = 5, desde = 0 } = req.query;
-  const query = {};
+  const usuarios = await Usuario.find({}).select("-password");
 
-  const [total, usuarios] = await Promise.all([
-    Usuario.countDocuments(query),
-    Usuario.find(query)
-      .select("-password")
-      .skip(Number(desde))
-      .limit(Number(limite)),
-  ]);
-
-  res.json({ total, usuarios });
+  res.json({ total: usuarios.length, usuarios });
 };
 
 // ----------------- CREAR USUARIO ------------------------
