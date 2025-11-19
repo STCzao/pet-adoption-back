@@ -3,11 +3,10 @@ const Publicacion = require("../models/publicacion");
 
 const coleccionesPermitidas = ["publicaciones"];
 
-const buscarPublicaciones = async (termino, tipo, res = response) => {
+const buscarPublicaciones = async (termino = "", tipo, res = response) => {
   try {
     const regex = new RegExp(termino, "i");
 
-    // Solo publicaciones activas (no INACTIVO)
     const query = {
       estado: { $ne: "INACTIVO" },
       $or: [
@@ -27,6 +26,8 @@ const buscarPublicaciones = async (termino, tipo, res = response) => {
 
     const publicaciones = await Publicacion.find(query)
       .populate("usuario", "nombre")
+      .select("titulo tipo img raza color lugar") // datos livianos para autocomplete
+      .limit(10)
       .sort({ fechaCreacion: -1 });
 
     res.json({
@@ -44,8 +45,8 @@ const buscarPublicaciones = async (termino, tipo, res = response) => {
 };
 
 const buscar = async (req = request, res = response) => {
-  const { coleccion, termino } = req.params;
-  const { tipo } = req.query;
+  const { coleccion } = req.params;
+  const { termino = "", tipo = "" } = req.query;
 
   if (!coleccionesPermitidas.includes(coleccion)) {
     return res.status(400).json({
