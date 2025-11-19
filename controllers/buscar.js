@@ -3,10 +3,19 @@ const Publicacion = require("../models/publicacion");
 
 const coleccionesPermitidas = ["publicaciones"];
 
-const buscarPublicaciones = async (termino = "", tipo, res = response) => {
-  try {
-    const regex = new RegExp(termino, "i");
+// Escapa caracteres especiales para evitar matches falsos con regex
+const escapeRegex = (string) => {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+};
 
+const buscarPublicaciones = async (termino, tipo, res = response) => {
+  try {
+
+    // Bloquea ".", "*", "+", "?", etc
+    const safeTerm = escapeRegex(termino);
+    const regex = new RegExp(safeTerm, "i");
+
+    // Solo publicaciones activas (no INACTIVO)
     const query = {
       estado: { $ne: "INACTIVO" },
       $or: [
@@ -26,8 +35,6 @@ const buscarPublicaciones = async (termino = "", tipo, res = response) => {
 
     const publicaciones = await Publicacion.find(query)
       .populate("usuario", "nombre")
-      .select("titulo tipo img raza color lugar") // datos livianos para autocomplete
-      .limit(10)
       .sort({ fechaCreacion: -1 });
 
     res.json({
@@ -35,6 +42,7 @@ const buscarPublicaciones = async (termino = "", tipo, res = response) => {
       results: publicaciones.length,
       publicaciones,
     });
+
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -45,15 +53,13 @@ const buscarPublicaciones = async (termino = "", tipo, res = response) => {
 };
 
 const buscar = async (req = request, res = response) => {
-  const { coleccion } = req.params;
-  const { termino = "", tipo = "" } = req.query;
+  const { coleccion, termino } = req.params;
+  const { tipo } = req.query;
 
   if (!coleccionesPermitidas.includes(coleccion)) {
     return res.status(400).json({
       success: false,
-      msg: `Las colecciones permitidas son: ${coleccionesPermitidas.join(
-        ", "
-      )}`,
+      msg: `Las colecciones permitidas son: ${coleccionesPermitidas.join(", ")}`,
     });
   }
 
@@ -69,3 +75,4 @@ const buscar = async (req = request, res = response) => {
 };
 
 module.exports = { buscar };
+
