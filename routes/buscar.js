@@ -3,6 +3,7 @@ const { buscar } = require("../controllers/buscar");
 
 const router = Router();
 
-router.get("/:coleccion/:termino", buscar);
+// Nueva ruta para autocomplete y búsqueda
+router.get("/:coleccion", buscar);
 
 module.exports = router;
