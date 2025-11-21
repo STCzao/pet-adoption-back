@@ -73,7 +73,7 @@ const PublicacionSchema = Schema({
   edad: {
     type: String,
     required: [true, "La edad es obligatoria"],
-    maxlength: [20, "La edad no puede tener más de 20 caracteres"],
+    enum: ["CACHORRO", "ADULTO", "MAYOR"],
   },
   afinidad: {
     type: String,
