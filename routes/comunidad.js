@@ -6,7 +6,7 @@ const {
   comunidadPost,
   comunidadPut,
   comunidadDelete,
-} = require("../controllers/comunidadController");
+} = require("../controllers/comunidad");
 
 const router = Router();
 

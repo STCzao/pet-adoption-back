@@ -11,7 +11,7 @@ class Server {
       auth: "/api/auth",
       usuarios: "/api/usuarios",
       publicaciones: "/api/publicaciones",
-      casosAyuda: "/api/casosAyuda",
+      comunidad: "/api/comunidad",
     };
 
     // Conectar a base de datos
@@ -50,7 +50,7 @@ class Server {
   }
 
   routes() {
-    this.app.use(this.paths.casosAyuda, require("../routes/casosAyuda"));
+    this.app.use(this.paths.comunidad, require("../routes/comunidad"));
     this.app.use(this.paths.auth, require("../routes/auth"));
     this.app.use(this.paths.usuarios, require("../routes/usuarios"));
     this.app.use(this.paths.publicaciones, require("../routes/publicaciones"));
