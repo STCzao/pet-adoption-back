@@ -82,7 +82,7 @@ router.post(
       "ADULTO",
       "MAYOR",
     ]),
-    ("whatsapp", "El WhatsApp es obligatorio").not().isEmpty(),
+    check("whatsapp", "El WhatsApp es obligatorio").not().isEmpty(),
     check("whatsapp", "El formato de WhatsApp no es válido").matches(
       /^\+?[0-9\s\-()]{10,15}$/
     ),
