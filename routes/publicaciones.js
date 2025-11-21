@@ -68,6 +68,7 @@ router.post(
     }),
     check("sexo", "El sexo es obligatorio").isIn(["MACHO", "HEMBRA"]),
     check("tamaño", "El tamaño es obligatorio").isIn([
+      "MINI",
       "PEQUEÑO",
       "MEDIANO",
       "GRANDE",
@@ -76,11 +77,12 @@ router.post(
     check("color", "El color no puede tener más de 20 caracteres").isLength({
       max: 20,
     }),
-    check("edad", "La edad es obligatoria").not().isEmpty(),
-    check("edad", "La edad no puede tener más de 20 caracteres").isLength({
-      max: 20,
-    }),
-    check("whatsapp", "El WhatsApp es obligatorio").not().isEmpty(),
+    check("edad", "La edad es obligatoria").isIn([
+      "CACHORRO",
+      "ADULTO",
+      "MAYOR",
+    ]),
+    k("whatsapp", "El WhatsApp es obligatorio").not().isEmpty(),
     check("whatsapp", "El formato de WhatsApp no es válido").matches(
       /^\+?[0-9\s\-()]{10,15}$/
     ),

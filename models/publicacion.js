@@ -55,7 +55,7 @@ const PublicacionSchema = Schema({
   tamaño: {
     type: String,
     required: [true, "El tamaño es obligatorio"],
-    enum: ["PEQUEÑO", "MEDIANO", "GRANDE"],
+    enum: ["MINI","PEQUEÑO", "MEDIANO", "GRANDE"],
   },
   color: {
     type: String,
