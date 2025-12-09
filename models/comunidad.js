@@ -9,12 +9,12 @@ const ComunidadSchema = Schema({
   contenido: {
     type: String,
     required: [true, "El contenido es obligatorio"],
-    maxlength: [2000, "El contenido no puede tener mas de 3000 caracteres"],
+    maxlength: [3000, "El contenido no puede tener mas de 3000 caracteres"],
   },
   categoria: {
     type: String,
     required: true,
-    enum: ["INFORMACION", "CONSEJO", "HISTORIA", "ALERTA"],
+    enum: ["HISTORIA", "ALERTA"],
   },
   img: {
     type: String,
