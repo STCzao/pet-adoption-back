@@ -14,7 +14,7 @@ const ComunidadSchema = Schema({
   categoria: {
     type: String,
     required: true,
-    enum: ["INFORMACION", "CONSEJO", "HISTORIA", "ALERTA"],
+    enum: ["HISTORIA", "ALERTA"],
   },
   img: {
     type: String,

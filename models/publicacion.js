@@ -4,7 +4,7 @@ const PublicacionSchema = Schema({
   titulo: {
     type: String,
     required: [true, "El título es obligatorio"],
-    maxlength: [60, "El título no puede tener más de 60 caracteres"],
+    maxlength: [70, "El título no puede tener más de 60 caracteres"],
     match: [
       /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s.,!?()-]+$/,
       "El título contiene caracteres no válidos",
@@ -28,7 +28,7 @@ const PublicacionSchema = Schema({
   raza: {
     type: String,
     required: [true, "La raza es obligatoria"],
-    maxlength: [30, "La raza no puede tener más de 30 caracteres"],
+    maxlength: [40, "La raza no puede tener más de 40 caracteres"],
     match: [
       /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/,
       "La raza solo puede contener letras y espacios",
@@ -39,7 +39,7 @@ const PublicacionSchema = Schema({
     required: function () {
       return this.tipo === "PERDIDO" || this.tipo === "ENCONTRADO";
     },
-    maxlength: [50, "El lugar no puede tener más de 50 caracteres"],
+    maxlength: [80, "El lugar no puede tener más de 80 caracteres"],
   },
   fecha: {
     type: String,
@@ -60,7 +60,7 @@ const PublicacionSchema = Schema({
   color: {
     type: String,
     required: [true, "El color es obligatorio"],
-    maxlength: [20, "El color no puede tener más de 20 caracteres"],
+    maxlength: [50, "El color no puede tener más de 50 caracteres"],
     match: [
       /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s/-]+$/,
       "El color contiene caracteres no válidos",
@@ -68,7 +68,7 @@ const PublicacionSchema = Schema({
   },
   detalles: {
     type: String,
-    maxlength: [150, "Los detalles no pueden tener más de 150 caracteres"],
+    maxlength: [250, "Los detalles no pueden tener más de 150 caracteres"],
   },
   edad: {
     type: String,
