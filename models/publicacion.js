@@ -4,7 +4,7 @@ const PublicacionSchema = Schema({
   titulo: {
     type: String,
     required: [true, "El título es obligatorio"],
-    maxlength: [70, "El título no puede tener más de 60 caracteres"],
+    maxlength: [70, "El título no puede tener más de 70 caracteres"],
     match: [
       /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s.,!?()-]+$/,
       "El título contiene caracteres no válidos",
@@ -68,7 +68,7 @@ const PublicacionSchema = Schema({
   },
   detalles: {
     type: String,
-    maxlength: [250, "Los detalles no pueden tener más de 150 caracteres"],
+    maxlength: [250, "Los detalles no pueden tener más de 250 caracteres"],
   },
   edad: {
     type: String,
