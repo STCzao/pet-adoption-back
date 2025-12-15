@@ -48,10 +48,7 @@ router.post(
   "/",
   [
     validarJWT,
-    check("titulo", "El título es obligatorio").not().isEmpty(),
-    check("titulo", "El título no puede tener más de 60 caracteres").isLength({
-      max: 60,
-    }),
+
     check("descripcion", "La descripción es obligatoria").not().isEmpty(),
     check(
       "descripcion",
