@@ -53,16 +53,8 @@ router.post(
       "ENCONTRADO",
       "ADOPCION",
     ]),
-    check(
-      "especie",
-      "La especie es obligatoria".isIn([
-        "PERRO",
-        "GATO",
-        "AVE",
-        "CONEJO",
-        "OTRO",
-      ])
-    ),
+    check("especie", "La especie es obligatoria").isIn(["PERRO", "GATO", "AVE", "CONEJO", "OTRO"]),
+
     check("raza", "La raza es obligatoria").not().isEmpty(),
     check("raza", "La raza no puede tener más de 30 caracteres").isLength({
       max: 30,
