@@ -7,6 +7,11 @@ const PublicacionSchema = Schema({
     required: true,
     enum: ["PERDIDO", "ENCONTRADO", "ADOPCION"],
   },
+  especie: {
+    type: String,
+    required: [true, "La especie es obligatoria"],
+    enum: ["PERRO", "GATO", "AVE", "CONEJO", "OTRO"],
+  },
   estado: {
     type: String,
     default: "ACTIVO",
@@ -37,12 +42,12 @@ const PublicacionSchema = Schema({
   sexo: {
     type: String,
     required: [true, "El sexo es obligatorio"],
-    enum: ["MACHO", "HEMBRA"],
+    enum: ["MACHO", "HEMBRA", "DESCONOZCO"],
   },
   tamaño: {
     type: String,
     required: [true, "El tamaño es obligatorio"],
-    enum: ["MINI", "PEQUEÑO", "MEDIANO", "GRANDE"],
+    enum: ["MINI", "PEQUEÑO", "MEDIANO", "GRANDE", "SIN ESPECIFICAR"],
   },
   color: {
     type: String,
@@ -60,7 +65,7 @@ const PublicacionSchema = Schema({
   edad: {
     type: String,
     required: [true, "La edad es obligatoria"],
-    enum: ["CACHORRO", "ADULTO", "MAYOR"],
+    enum: ["CACHORRO", "ADULTO", "MAYOR", "SIN ESPECIFICAR"],
   },
   afinidad: {
     type: String,

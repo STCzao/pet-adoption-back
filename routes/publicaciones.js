@@ -53,16 +53,27 @@ router.post(
       "ENCONTRADO",
       "ADOPCION",
     ]),
+    check(
+      "especie",
+      "La especie es obligatoria".isIn([
+        "PERRO",
+        "GATO",
+        "AVE",
+        "CONEJO",
+        "OTRO",
+      ])
+    ),
     check("raza", "La raza es obligatoria").not().isEmpty(),
     check("raza", "La raza no puede tener más de 30 caracteres").isLength({
       max: 30,
     }),
-    check("sexo", "El sexo es obligatorio").isIn(["MACHO", "HEMBRA"]),
+    check("sexo", "El sexo es obligatorio").isIn(["MACHO", "HEMBRA", "DESCONOZCO"]),
     check("tamaño", "El tamaño es obligatorio").isIn([
       "MINI",
       "PEQUEÑO",
       "MEDIANO",
       "GRANDE",
+      "SIN ESPECIFICAR",
     ]),
     check("color", "El color es obligatorio").not().isEmpty(),
     check("color", "El color no puede tener más de 20 caracteres").isLength({
@@ -72,6 +83,7 @@ router.post(
       "CACHORRO",
       "ADULTO",
       "MAYOR",
+      "SIN ESPECIFICAR",
     ]),
     check("whatsapp", "El WhatsApp es obligatorio").not().isEmpty(),
     check("whatsapp", "El formato de WhatsApp no es válido").matches(
