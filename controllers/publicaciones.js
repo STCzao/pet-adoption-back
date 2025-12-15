@@ -33,7 +33,6 @@ const publicacionesGet = async (req, res = response) => {
     if (search) {
       const regex = new RegExp(search, "i");
       query.$or = [
-        { descripcion: regex },
         { raza: regex },
         { color: regex },
         { detalles: regex },
@@ -137,7 +136,6 @@ const publicacionesPost = async (req, res = response) => {
 
     // Normalizar todos los campos de texto (excepto whatsapp)
     const datosNormalizados = {
-      descripcion: normalizarTexto(body.descripcion),
       tipo: normalizarTexto(body.tipo),
       raza: normalizarTexto(body.raza),
       lugar: body.lugar ? normalizarTexto(body.lugar) : undefined,
