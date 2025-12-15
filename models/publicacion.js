@@ -1,14 +1,6 @@
 const { Schema, model } = require("mongoose");
 
 const PublicacionSchema = Schema({
-  titulo: {
-    type: String,
-    maxlength: [70, "El título no puede tener más de 70 caracteres"],
-    match: [
-      /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s.,!?()-]+$/,
-      "El título contiene caracteres no válidos",
-    ],
-  },
   descripcion: {
     type: String,
     required: [true, "La descripción es obligatoria"],
@@ -54,7 +46,7 @@ const PublicacionSchema = Schema({
   tamaño: {
     type: String,
     required: [true, "El tamaño es obligatorio"],
-    enum: ["MINI","PEQUEÑO", "MEDIANO", "GRANDE"],
+    enum: ["MINI", "PEQUEÑO", "MEDIANO", "GRANDE"],
   },
   color: {
     type: String,
