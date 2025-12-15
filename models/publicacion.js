@@ -1,11 +1,7 @@
 const { Schema, model } = require("mongoose");
 
 const PublicacionSchema = Schema({
-  descripcion: {
-    type: String,
-    required: [true, "La descripción es obligatoria"],
-    maxlength: [300, "La descripción no puede tener más de 300 caracteres"],
-  },
+  
   tipo: {
     type: String,
     required: true,

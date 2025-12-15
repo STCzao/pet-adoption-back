@@ -48,12 +48,6 @@ router.post(
   "/",
   [
     validarJWT,
-
-    check("descripcion", "La descripción es obligatoria").not().isEmpty(),
-    check(
-      "descripcion",
-      "La descripción no puede tener más de 300 caracteres"
-    ).isLength({ max: 300 }),
     check("tipo", "El tipo es obligatorio").isIn([
       "PERDIDO",
       "ENCONTRADO",
