@@ -1,7 +1,6 @@
 const { Schema, model } = require("mongoose");
 
 const PublicacionSchema = Schema({
-  
   tipo: {
     type: String,
     required: true,
@@ -52,11 +51,7 @@ const PublicacionSchema = Schema({
   color: {
     type: String,
     required: [true, "El color es obligatorio"],
-    maxlength: [50, "El color no puede tener más de 50 caracteres"],
-    match: [
-      /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s/-]+$/,
-      "El color contiene caracteres no válidos",
-    ],
+    maxlength: [80, "El color no puede tener más de 50 caracteres"],
   },
   detalles: {
     type: String,
