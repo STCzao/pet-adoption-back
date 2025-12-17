@@ -72,12 +72,10 @@ router.post(
     )
       .not()
       .isEmpty(),
-    check(
-      "nombreanimal",
-      "El nombre del animal no puede tener más de 60 caracteres"
-    ).isLength({
-      max: 60,
-    }),
+    check("nombreanimal")
+      .optional()
+      .isLength({ max: 60 })
+      .withMessage("El nombre del animal no puede tener más de 60 caracteres"),
 
     check("sexo", "El sexo es obligatorio").isIn([
       "MACHO",
