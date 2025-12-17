@@ -65,6 +65,20 @@ router.post(
     check("raza", "La raza no puede tener más de 40 caracteres").isLength({
       max: 40,
     }),
+
+    check(
+      "nombreanimal",
+      "El nombre del animal es obligatorio para perdidos y adopciones"
+    )
+      .not()
+      .isEmpty(),
+    check(
+      "nombreanimal",
+      "El nombre del animal no puede tener más de 60 caracteres"
+    ).isLength({
+      max: 60,
+    }),
+
     check("sexo", "El sexo es obligatorio").isIn([
       "MACHO",
       "HEMBRA",

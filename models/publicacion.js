@@ -6,6 +6,11 @@ const PublicacionSchema = Schema({
     required: true,
     enum: ["PERDIDO", "ENCONTRADO", "ADOPCION"],
   },
+  nombreanimal: {
+    type: String,
+    required: [true, "El nombre del animal es obligatorio"],
+    maxlength: [60, "El nombre del animal no puede tener más de 60 caracteres"],
+  },
   especie: {
     type: String,
     required: [true, "La especie es obligatoria"],
