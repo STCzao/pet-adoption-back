@@ -8,9 +8,12 @@ const PublicacionSchema = Schema({
   },
   nombreanimal: {
     type: String,
-    required: [true, "El nombre del animal es obligatorio"],
+    required: function () {
+      return this.tipo === "PERDIDO" || this.tipo === "ADOPCION";
+    },
     maxlength: [60, "El nombre del animal no puede tener más de 60 caracteres"],
   },
+
   especie: {
     type: String,
     required: [true, "La especie es obligatoria"],
@@ -60,9 +63,12 @@ const PublicacionSchema = Schema({
   },
   edad: {
     type: String,
-    required: [true, "La edad es obligatoria"],
+    required: function () {
+      return this.tipo === "PERDIDO" || this.tipo === "ADOPCION";
+    },
     enum: ["CACHORRO", "ADULTO", "MAYOR", "SIN ESPECIFICAR"],
   },
+
   afinidad: {
     type: String,
     required: function () {
@@ -98,7 +104,7 @@ const PublicacionSchema = Schema({
     type: String,
     required: [true, "La imagen es obligatoria"],
     match: [
-      /^https:\/\/res\.cloudinary\.com\/.+\/.+\.(jpg|jpeg|png|webp)$/,
+      /^https:\/\/res\.cloudinary\.com\/.+$/,
       "La URL de imagen no es válida",
     ],
   },
