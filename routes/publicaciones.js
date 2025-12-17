@@ -66,12 +66,17 @@ router.post(
       max: 40,
     }),
 
-    check(
-      "nombreanimal",
-      "El nombre del animal es obligatorio para perdidos y adopciones"
-    )
-      .not()
-      .isEmpty(),
+    check("nombreanimal").custom((value, { req }) => {
+      if (
+        (req.body.tipo === "PERDIDO" || req.body.tipo === "ADOPCION") &&
+        !value
+      ) {
+        throw new Error(
+          "El nombre del animal es obligatorio para perdidos y adopciones"
+        );
+      }
+      return true;
+    }),
     check("nombreanimal")
       .optional()
       .isLength({ max: 60 })
