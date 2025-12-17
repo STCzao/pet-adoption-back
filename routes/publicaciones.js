@@ -95,12 +95,10 @@ router.post(
     check("color", "El color no puede tener más de 20 caracteres").isLength({
       max: 80,
     }),
-    check("edad", "La edad es obligatoria").isIn([
-      "CACHORRO",
-      "ADULTO",
-      "MAYOR",
-      "SIN ESPECIFICAR",
-    ]),
+    check("edad")
+      .optional()
+      .isIn(["CACHORRO", "ADULTO", "MAYOR", "SIN ESPECIFICAR"]),
+
     check("whatsapp", "El WhatsApp es obligatorio").not().isEmpty(),
     check("whatsapp", "El formato de WhatsApp no es válido").matches(
       /^\+?[0-9\s\-()]{10,15}$/
