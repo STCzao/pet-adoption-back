@@ -20,10 +20,6 @@ const PublicacionSchema = Schema({
     type: String,
     required: [true, "La raza es obligatoria"],
     maxlength: [40, "La raza no puede tener más de 40 caracteres"],
-    match: [
-      /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/,
-      "La raza solo puede contener letras y espacios",
-    ],
   },
   lugar: {
     type: String,

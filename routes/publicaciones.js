@@ -62,8 +62,8 @@ router.post(
     ]),
 
     check("raza", "La raza es obligatoria").not().isEmpty(),
-    check("raza", "La raza no puede tener más de 30 caracteres").isLength({
-      max: 30,
+    check("raza", "La raza no puede tener más de 40 caracteres").isLength({
+      max: 40,
     }),
     check("sexo", "El sexo es obligatorio").isIn([
       "MACHO",
@@ -79,7 +79,7 @@ router.post(
     ]),
     check("color", "El color es obligatorio").not().isEmpty(),
     check("color", "El color no puede tener más de 20 caracteres").isLength({
-      max: 20,
+      max: 80,
     }),
     check("edad", "La edad es obligatoria").isIn([
       "CACHORRO",
