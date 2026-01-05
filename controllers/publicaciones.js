@@ -50,8 +50,6 @@ const publicacionesGet = async (req, res = response) => {
       Publicacion.countDocuments(query),
       Publicacion.find(query)
         .populate("usuario", "nombre")
-        .skip(Number(desde))
-        .limit(Number(limite))
         .sort({ fechaCreacion: -1 }),
     ]);
 
