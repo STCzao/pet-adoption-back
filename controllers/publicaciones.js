@@ -400,7 +400,7 @@ const obtenerContactoPublicacion = async (req, res = response) => {
 // Admin: ver todas las publicaciones (incluyendo INACTIVO)
 const publicacionesAdminGet = async (req, res = response) => {
   try {
-    const { limite = 10, desde = 0, estado } = req.query;
+    const { estado } = req.query;
 
     const query = {};
     if (estado) {
@@ -411,8 +411,6 @@ const publicacionesAdminGet = async (req, res = response) => {
       Publicacion.countDocuments(query),
       Publicacion.find(query)
         .populate("usuario", "nombre correo")
-        .skip(Number(desde))
-        .limit(Number(limite))
         .sort({ fechaCreacion: -1 }),
     ]);
 
