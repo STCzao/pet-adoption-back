@@ -10,7 +10,7 @@ const normalizarTexto = (texto) => {
 // Obtener publicaciones públicas (todas excepto INACTIVO)
 const publicacionesGet = async (req, res = response) => {
   try {
-    const { limite = 10, desde = 0, tipo, estado, search } = req.query;
+    const { tipo, estado, search } = req.query;
 
     // Query base: excluir SOLO INACTIVO - incluir ACTIVO, ENCONTRADO, VISTO, ADOPTADO
     const query = { estado: { $ne: "INACTIVO" } };
@@ -50,8 +50,6 @@ const publicacionesGet = async (req, res = response) => {
       Publicacion.countDocuments(query),
       Publicacion.find(query)
         .populate("usuario", "nombre")
-        .skip(Number(desde))
-        .limit(Number(limite))
         .sort({ fechaCreacion: -1 }),
     ]);
 
