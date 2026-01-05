@@ -34,7 +34,7 @@ const publicacionesGet = async (req, res = response) => {
       const regex = new RegExp(search, "i");
       query.$or = [
         { nombreanimal: regex },
-        { especie: regex }, 
+        { especie: regex },
         { raza: regex },
         { color: regex },
         { detalles: regex },
@@ -149,6 +149,9 @@ const publicacionesPost = async (req, res = response) => {
       edad: normalizarTexto(body.edad),
       detalles: body.detalles ? normalizarTexto(body.detalles) : undefined,
       afinidad: body.afinidad ? normalizarTexto(body.afinidad) : undefined,
+      afinidadanimales: body.afinidadanimales
+        ? normalizarTexto(body.afinidadanimales)
+        : undefined,
       energia: body.energia ? normalizarTexto(body.energia) : undefined,
       castrado: body.castrado,
       whatsapp: body.whatsapp, // Mantener formato original

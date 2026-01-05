@@ -68,13 +68,19 @@ const PublicacionSchema = Schema({
     },
     enum: ["CACHORRO", "ADULTO", "MAYOR", "SIN ESPECIFICAR"],
   },
-
   afinidad: {
     type: String,
     required: function () {
       return this.tipo === "ADOPCION";
     },
-    enum: ["ALTA", "MEDIA", "BAJA"],
+    enum: ["ALTA", "MEDIA", "BAJA", "DESCONOZCO"],
+  },
+  afinidadanimales: {
+    type: String,
+    required: function () {
+      return this.tipo === "ADOPCION";
+    },
+    enum: ["ALTA", "MEDIA", "BAJA", "DESCONOZCO"],
   },
   energia: {
     type: String,
